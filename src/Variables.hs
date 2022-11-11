@@ -28,6 +28,9 @@ Getter of the path of image file.
 Args:
     - the index of the image. Note that this is just a formatter to produce
       the file path. It does not check if such file exists.
+
+Returns:
+    - path of the image
 -}
 imageFile :: Int -> FilePath
 imageFile n = tempDir </> show n <.> "png"

@@ -90,6 +90,8 @@ library
       common-stanza
   exposed-modules:
       Lib
+      Variables
+      VideoToImage
   hs-source-dirs:
       src
   default-language: Haskell2010
@@ -121,4 +123,5 @@ test-suite ascii-vid-generator-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       ascii-vid-generator
-
+  other-modules:
+      VideoToImageTest
