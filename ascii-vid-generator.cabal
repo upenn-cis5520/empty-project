@@ -1,5 +1,5 @@
 cabal-version:  2.2
-name:           project-cis5520
+name:           ascii-vid-generator
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/project-cis5520#readme>
 homepage:       https://github.com/githubuser/project-cis5520#readme
@@ -32,6 +32,7 @@ common common-stanza
     , random
     , mtl
     , brick
+    , JuicyPixels
   default-language:
     Haskell2010
   -- these extensions are enabled for GHC2021, turning them on now for 
@@ -92,7 +93,8 @@ library
       src
   default-language: Haskell2010
 
-executable ascii-vid-generator
+
+executable ascii-vid-generator-exe
   import:
       common-stanza
   main-is: 
@@ -101,11 +103,12 @@ executable ascii-vid-generator
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      project-cis5520
+      ascii-vid-generator
       , brick >= 0.21
+      , JuicyPixels == 3.3.8
 
 
-test-suite project-cis5520-test
+test-suite ascii-vid-generator-test
   import:
       common-stanza
   type: 
@@ -116,5 +119,5 @@ test-suite project-cis5520-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      project-cis5520
+      ascii-vid-generator
 
