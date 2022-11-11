@@ -33,6 +33,7 @@ common common-stanza
     , mtl
     , brick
     , JuicyPixels
+    , process
   default-language:
     Haskell2010
   -- these extensions are enabled for GHC2021, turning them on now for 
