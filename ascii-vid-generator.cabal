@@ -34,6 +34,7 @@ common common-stanza
     , brick
     , JuicyPixels
     , process
+    , matrix
   default-language:
     Haskell2010
   -- these extensions are enabled for GHC2021, turning them on now for 
@@ -92,6 +93,7 @@ library
       Lib
       Variables
       VideoToImage
+      ImageIO
   hs-source-dirs:
       src
   default-language: Haskell2010
@@ -125,3 +127,4 @@ test-suite ascii-vid-generator-test
       ascii-vid-generator
   other-modules:
       VideoToImageTest
+      ImageIOTest

@@ -2,7 +2,10 @@ import Test.HUnit
 import Test.QuickCheck
 
 import VideoToImageTest
+import ImageIOTest
 
-main :: IO Counts
+main :: IO ()
 main = do
-    runVideoToImageTests
+    _ <- runVideoToImageTests
+    _ <- runImageIOTests
+    return ()
