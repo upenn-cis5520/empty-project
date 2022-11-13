@@ -5,7 +5,6 @@ module ImageIOTest where
 import Test.HUnit
 import Test.QuickCheck
 import ImageIO
-    ( RGBImage(RGBImage, r, g, b), dynamicImageToRGBImage )
 import Codec.Picture
 import Data.Matrix
 import Control.Monad
