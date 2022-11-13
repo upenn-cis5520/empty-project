@@ -9,7 +9,7 @@ data RGBImage = RGBImage
         g :: Matrix Int,
         b :: Matrix Int
     }
-
+    deriving (Eq, Show)
 
 {-
 Reads the image from the given file path
