@@ -1,32 +1,78 @@
+
+{-#LANGUAGE GADTs, EmptyDataDecls #-}
 module Lib
     ( someFunc
     ) where
-
-someFunc :: String
-someFunc = "Hello CIS 5520"
 
 
 
 import Data.Map (Map)
 import qualified Data.Map as Map
+import qualified State as S
 
 type Node = Int
 -- data Graph = G Vertices Edges deriving Show
 -- newtype Vertices = V [Node]
-data Edge = E {source::Node, dest:: Node, weight::Int}
+data Edge = E {source::Node, dest:: Node, weight::Float}
 -- type Edges = [Edge]
 type GraphMap = Map Node [Edge]
 type Path = [Edge]
 type PathMap = Map Node Path
 type SingleSource = (GraphMap -> Node -> PathMap)
 
-toAdjList :: Graph -> GraphMap
+--toAdjList :: Graph -> GraphMap
 
+
+type Visited = S Store Bool 
+type Distances = S Store Bool 
+
+queryVisited :: (Store -> Bool) -> Visited
+queryVisited = undefined 
+
+queryDistance :: (Store -> Float) -> Distances
+queryDistance = undefined
+
+
+-- Non-negative graph map
+data NN = O | I Float
+data NNE src dest weight where
+    W :: NNE src dest O
+    NNE :: src -> dest -> weight -> NNE src dest (I weight)
+
+<<<<<<< HEAD
 dijkstra :: GraphMap -> Node -> PathMap
+=======
+type GraphMapNN = Map Node [NNE]
+
+dijkstra :: GraphMapNN -> Node -> Map Node Path
+dijkstra = undefined
+    where 
+        search :: GraphMapNN-> Node -> Visited -> Distances
+        search = undefined
+        searchNeighbors :: GraphMapNN -> [Node] -> Visited -> Distances
+        searchNeighbors = undefined 
+
+
+aStar :: GraphMap -> Node -> Map Node Path
+aStar = undefined
+    where 
+        search :: GraphMap -> Node -> Visited -> Distances
+        search = undefined
+        searchNeighbors :: GraphMap -> [Node] -> Visited -> Distances
+        searchNeighbors = undefined 
+    
+-- Dijkstra only takes weighted graph without cycle
+>>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
 
 bellmanFord :: GraphMap -> Node -> PathMap
 
+<<<<<<< HEAD
 astar :: GraphMap -> Node -> Node -> PathMap
+=======
+
+
+dfs :: GraphMap -> Node -> Map Node Path
+>>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
 
 bfs :: GraphMap -> Node -> PathMap
 
@@ -52,6 +98,7 @@ allShortest :: GraphMap -> Node -> PathMap-> Bool
 allShortest g s m = all (uncurry (pathShortest g s)) (Map.toList m)
 -- Unit Tests
 
+<<<<<<< HEAD
 -- Tests whether a path-finding algorithm correctly finds no path
 -- between two nodes that are not connected. Iterates over all
 -- 
@@ -61,3 +108,7 @@ testUnconnected g s m = all good (Map.keys g)
         good d = unconnected g s d == not (Map.member d m)
         
 -- Arbitrary Instances
+=======
+
+
+>>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
