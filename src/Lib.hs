@@ -1,5 +1,6 @@
 
 {-#LANGUAGE GADTs, EmptyDataDecls #-}
+
 module Lib
     ( someFunc
     ) where
@@ -32,12 +33,22 @@ queryDistance = undefined
 
 
 -- Non-negative graph map
-data NN = O | I Float
-data NNE src dest weight where
-    W :: NNE src dest O
-    NNE :: src -> dest -> weight -> NNE src dest (I weight)
+data NN = O | S NN -- use peano numbers to get non-negative
+data NNE :: Type -> Type -> NN -> Type where
+    NNE :: src -> dest -> weight -> NNE src dest weight 
+
+
+
+type family IsNN (src :: Node ) (dest :: Node) (weight :: Int) :: Bool  where 
+    IsNN src dest w = w > 0
 
 type GraphMapNN = Map Node [NNE]
+
+
+--check if a graph is a valid (directed acylic graph)
+isValidDAG :: GraphMapNN -> Bool
+isValidDAG = undefined
+
 
 dijkstra :: GraphMapNN -> Node -> Map Node Path
 dijkstra = undefined
@@ -55,8 +66,18 @@ aStar = undefined
         search = undefined
         searchNeighbors :: GraphMap -> [Node] -> Visited -> Distances
         searchNeighbors = undefined 
+
     
 -- Dijkstra only takes weighted graph without cycle
+
+
+bellmanFord :: GraphMapNN -> Node -> Map Node Path
+bellmanFord = undefined
+    where 
+        search :: GraphMapNN-> Node -> Visited -> Distances
+        search = undefined
+        searchNeighbors :: GraphMapNN -> [Node] -> Visited -> Distances
+        searchNeighbors = undefined 
 
 bfs :: GraphMap -> Node -> Map Node Path
 
