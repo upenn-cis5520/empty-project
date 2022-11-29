@@ -44,9 +44,6 @@ data NNE :: Type -> Type -> NN -> Type where
 type family IsNN (src :: Node ) (dest :: Node) (weight :: Int) :: Bool  where 
     IsNN src dest w = w > 0
 
-<<<<<<< HEAD
-dijkstra :: GraphMap -> Node -> PathMap
-=======
 type GraphMapNN = Map Node [NNE]
 
 
@@ -55,16 +52,17 @@ isValidDAG :: GraphMapNN -> Bool
 isValidDAG = undefined
 
 
-dijkstra :: GraphMapNN -> Node -> Map Node Path
+dijkstra :: GraphMapNN -> Node -> PathMap
 dijkstra = undefined
     where 
-        search :: GraphMapNN-> Node -> Visited -> Distances
+        search :: GraphMapNN-> Node -> Visited -> Distances -> PathMap
         search = undefined
-        searchNeighbors :: GraphMapNN -> [Node] -> Visited -> Distances
+        searchNeighbors :: GraphMapNN -> [Node] -> Visited -> Distances -> PathMap
         searchNeighbors = undefined 
 
 
-aStar :: GraphMap -> Node -> Map Node Path
+-- Node -> Node -> Float is a admissable heuristic function
+aStar :: GraphMap -> Node -> (Node -> Node -> Float) -> PathMap 
 aStar = undefined
     where 
         search :: GraphMap -> Node -> Visited -> Distances
@@ -74,19 +72,10 @@ aStar = undefined
 
     
 -- Dijkstra only takes weighted graph without cycle
->>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
-
-bfs :: GraphMap -> Node -> Map Node Path
-
-<<<<<<< HEAD
-astar :: GraphMap -> Node -> Node -> PathMap
-=======
-
-
-dfs :: GraphMap -> Node -> Map Node Path
->>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
 
 bfs :: GraphMap -> Node -> PathMap
+
+
 
 -- | Returns true if there is no path from the source to the destination
 unconnected :: GraphMap -> Node -> Node -> Bool
@@ -110,7 +99,6 @@ allShortest :: GraphMap -> Node -> PathMap-> Bool
 allShortest g s m = all (uncurry (pathShortest g s)) (Map.toList m)
 -- Unit Tests
 
-<<<<<<< HEAD
 -- Tests whether a path-finding algorithm correctly finds no path
 -- between two nodes that are not connected. Iterates over all
 -- 
@@ -120,7 +108,3 @@ testUnconnected g s m = all good (Map.keys g)
         good d = unconnected g s d == not (Map.member d m)
         
 -- Arbitrary Instances
-=======
-
-
->>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
