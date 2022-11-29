@@ -71,9 +71,19 @@ aStar = undefined
         searchNeighbors = undefined 
 
     
+bellmanFord :: GraphMap -> Node -> PathMap 
+bellmanFord = undefined
+    where 
+        search :: GraphMap -> Node -> Visited -> Distances -> PathMap
+        search = undefined
+        searchNeighbors :: GraphMap -> [Node] -> Visited -> Distances -> PathMap
+        searchNeighbors = undefined 
 -- Dijkstra only takes weighted graph without cycle
 
-bfs :: GraphMap -> Node -> PathMap
+getPathLength :: PathMap -> Int
+getPathLength = undefined
+
+
 
 
 
