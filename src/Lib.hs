@@ -18,6 +18,8 @@ data Edge = E {source::Node, dest:: Node, weight::Float}
 -- type Edges = [Edge]
 type GraphMap = Map Node [Edge]
 type Path = [Edge]
+type PathMap = Map Node Path
+type SingleSource = (GraphMap -> Node -> PathMap)
 
 --toAdjList :: Graph -> GraphMap
 
@@ -42,6 +44,9 @@ data NNE :: Type -> Type -> NN -> Type where
 type family IsNN (src :: Node ) (dest :: Node) (weight :: Int) :: Bool  where 
     IsNN src dest w = w > 0
 
+<<<<<<< HEAD
+dijkstra :: GraphMap -> Node -> PathMap
+=======
 type GraphMapNN = Map Node [NNE]
 
 
@@ -69,22 +74,23 @@ aStar = undefined
 
     
 -- Dijkstra only takes weighted graph without cycle
-
-
-bellmanFord :: GraphMapNN -> Node -> Map Node Path
-bellmanFord = undefined
-    where 
-        search :: GraphMapNN-> Node -> Visited -> Distances
-        search = undefined
-        searchNeighbors :: GraphMapNN -> [Node] -> Visited -> Distances
-        searchNeighbors = undefined 
+>>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
 
 bfs :: GraphMap -> Node -> Map Node Path
 
+<<<<<<< HEAD
+astar :: GraphMap -> Node -> Node -> PathMap
+=======
 
 
 dfs :: GraphMap -> Node -> Map Node Path
+>>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
 
+bfs :: GraphMap -> Node -> PathMap
+
+-- | Returns true if there is no path from the source to the destination
+unconnected :: GraphMap -> Node -> Node -> Bool
+unconnected g s d = not $ Map.member d $ bfs g s
 
 -- Given a graph (adjacency list) and path (list of nodes), return whether
 -- the path is a valid path in the graph.
@@ -97,18 +103,24 @@ pathValid g p = all (inGraph g) p && isValid p
         isValid (E s1 d1 _ : E s2 d2 _ : ps) = d1 == s2 && isValid (E s2 d2 _ : ps)
 
 -- Checks whether a path is a shortest path by comparing with a known algorithm.
-pathShortest :: Graph -> Node -> Node -> Path -> Bool
-
-
+pathShortest :: GraphMap -> Node -> Node -> Path -> Bool
+pathShortest g s d p = pathValid g p && (length p == length (bellmanFord g s Map.! d))
+-- Check pathValid and pathShortest for all shortest paths from a single node
+allShortest :: GraphMap -> Node -> PathMap-> Bool
+allShortest g s m = all (uncurry (pathShortest g s)) (Map.toList m)
 -- Unit Tests
--- Tests whether a path-finding algorithm returns a direct path from start
--- to end when available.
-directPathValid :: PathFinder -> Graph -> Node -> Node -> Bool 
--- add edge from start to end, 
 
--- Tests whether a path-finding algorithm correctly returns Nothing when
--- there is no path from start to end.
-testUnconnected :: PathFinder -> Graph -> Node -> Node -> Bool
+<<<<<<< HEAD
+-- Tests whether a path-finding algorithm correctly finds no path
+-- between two nodes that are not connected. Iterates over all
+-- 
+testUnconnected :: GraphMap -> Node -> PathMap -> Bool
+testUnconnected g s m = all good (Map.keys g)
+    where
+        good d = unconnected g s d == not (Map.member d m)
+        
+-- Arbitrary Instances
+=======
 
 
-
+>>>>>>> 04d61e389c10ffd33b9adf78e06878d20f653644
