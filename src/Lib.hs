@@ -75,7 +75,8 @@ aStar = undefined
 
 bfs :: GraphMap -> Node -> PathMap
 
-
+-- | Returns the sum of edge weights in a path
+pathLength :: Path -> Float
 
 -- | Returns true if there is no path from the source to the destination
 unconnected :: GraphMap -> Node -> Node -> Bool
@@ -93,7 +94,7 @@ pathValid g p = all (inGraph g) p && isValid p
 
 -- Checks whether a path is a shortest path by comparing with a known algorithm.
 pathShortest :: GraphMap -> Node -> Node -> Path -> Bool
-pathShortest g s d p = pathValid g p && (length p == length (bellmanFord g s Map.! d))
+pathShortest g s d p = pathValid g p && (pathLength p == pathLength (bellmanFord g s Map.! d))
 -- Check pathValid and pathShortest for all shortest paths from a single node
 allShortest :: GraphMap -> Node -> PathMap-> Bool
 allShortest g s m = all (uncurry (pathShortest g s)) (Map.toList m)
