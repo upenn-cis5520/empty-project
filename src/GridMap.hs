@@ -1,15 +1,17 @@
 module GridMap where
 
-import Graph 
-import Lib (Edge, GraphMap)
+import Graph (Edge, GraphMap)
 
-import Brick
 
+-- import Brick
+
+
+-- | Identifier for tiles in a grid
 type Place = Int
 -- | A map tile with an elevation and whether it is traversible
-newtype Tile = Tile { place :: Place, elevation :: Float, traversible :: Bool, neighbors :: [Place] } deriving (Show, Eq)
+data Tile = Tile { place :: Place, elevation :: Float, traversible :: Bool, neighbors :: [Place] } deriving (Show, Eq)
 
-newtype Grid = Grid {rows :: Int, cols :: Int, tiles :: [Tile]} deriving (Show, Eq)
+data Grid = Grid {rows :: Int, cols :: Int, tiles :: [Tile]} deriving (Show, Eq)
 
 -- | Get the tile at the given row and column in the grid
 getTile :: Grid -> Int -> Int -> Tile -- row <= rows, col <= cols
@@ -36,6 +38,7 @@ getNeighbors grid row col = map (\n -> getTile grid (n `div` cols grid) (n `mod`
 
 -- | Set the neighbors of a tile in the grid
 setNeighbors :: Grid -> Int -> Int -> [Tile] -> Grid
+setNeighbors grid row col newNeighbors = grid {tiles = map (\t -> if place t == place (getTile grid row col) then t {neighbors = map place newNeighbors} else t) (tiles grid)}
 
 
 -- | 

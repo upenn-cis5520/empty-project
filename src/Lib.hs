@@ -2,7 +2,7 @@
 {-#LANGUAGE GADTs, EmptyDataDecls #-}
 
 module Lib
-    ( someFunc
+    (
     ) where
 
 
@@ -10,17 +10,10 @@ module Lib
 import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified State as S
+import Graph (Node, Edge, GraphMap, Path)
 
-type Node = Int
--- data Graph = G Vertices Edges deriving Show
--- newtype Vertices = V [Node]
-data Edge = E {source::Node, dest:: Node, weight::Float}
--- type Edges = [Edge]
-type GraphMap = Map Node [Edge]
-type Path = [Edge]
 type PathMap = Map Node Path
 type SingleSource = (GraphMap -> Node -> PathMap)
-
 --toAdjList :: Graph -> GraphMap
 
 
@@ -75,9 +68,6 @@ aStar = undefined
 
 bfs :: GraphMap -> Node -> PathMap
 
--- | Returns the sum of edge weights in a path
-pathLength :: Path -> Float
-
 -- | Returns true if there is no path from the source to the destination
 unconnected :: GraphMap -> Node -> Node -> Bool
 unconnected g s d = not $ Map.member d $ bfs g s
@@ -90,15 +80,15 @@ pathValid g p = all (inGraph g) p && isValid p
         inGraph g (E s d _) = d `elem` (g Map.! s)
         isValid [] = True
         isValid [_] = True
-        isValid (E s1 d1 _ : E s2 d2 _ : ps) = d1 == s2 && isValid (E s2 d2 _ : ps)
-
+        isValid (E s1 d1 _ : E s2 d2 _ : ps) = d1 == s2 && isValid (E s2 d2 0 : ps)
+        
 -- Checks whether a path is a shortest path by comparing with a known algorithm.
 pathShortest :: GraphMap -> Node -> Node -> Path -> Bool
 pathShortest g s d p = pathValid g p && (pathLength p == pathLength (bellmanFord g s Map.! d))
+
 -- Check pathValid and pathShortest for all shortest paths from a single node
 allShortest :: GraphMap -> Node -> PathMap-> Bool
 allShortest g s m = all (uncurry (pathShortest g s)) (Map.toList m)
--- Unit Tests
 
 -- Tests whether a path-finding algorithm correctly finds no path
 -- between two nodes that are not connected. Iterates over all
@@ -107,5 +97,3 @@ testUnconnected :: GraphMap -> Node -> PathMap -> Bool
 testUnconnected g s m = all good (Map.keys g)
     where
         good d = unconnected g s d == not (Map.member d m)
-        
--- Arbitrary Instances
