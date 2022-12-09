@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import Graph
 
 main :: IO ()
-main = putStrLn someFunc
+main = putStrLn "Hello, Haskell!"

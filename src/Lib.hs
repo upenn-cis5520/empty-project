@@ -10,7 +10,7 @@ module Lib
 import Data.Map (Map)
 import qualified Data.Map as Map
 import qualified State as S
-import Graph (Node, Edge, GraphMap, Path)
+import Graph (Node, Edge(E), GraphMap, Path)
 
 type PathMap = Map Node Path
 type SingleSource = (GraphMap -> Node -> PathMap)

@@ -1,5 +1,5 @@
 module Graph
-    ( Node, Edge, GraphMap, Path, 
+    ( Node, Edge(E), GraphMap, Path, 
     ) where
 import Data.Map (Map)
 import qualified Data.Map as Map
