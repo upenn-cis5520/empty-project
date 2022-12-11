@@ -1,9 +1,21 @@
-module GridMap where
+module GridMap 
+  (Place, Tile, Grid
+  , getTile, gridToGraph, adjacents, simpleGrid, getNeighbors, setNeighbors
+  -- , setTraversible, setElevation, setTile
+  , gridTable
+  , testTable, drawTable
+  ) where
 
 import Graph (Edge(E), GraphMap)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Brick
+import Brick.BChan (newBChan, writeBChan)
+import Brick.Widgets.Table
+import qualified Brick.Widgets.Border as B
+import qualified Brick.Widgets.Border.Style as BS
+import qualified Brick.Widgets.Center as C
+import qualified Brick.Util as U
 
 
 -- | Identifier for tiles in a grid
@@ -42,5 +54,33 @@ getNeighbors grid row col = filter (\p -> traversible (getTile grid (p `div` col
 setNeighbors :: Grid -> Int -> Int -> [Place] -> Grid
 setNeighbors grid row col newNeighbors = grid {tiles = map (\t -> if place t == place (getTile grid row col) then t {neighbors = newNeighbors} else t) (tiles grid)}
 
--- >>> 2 + 2
--- | 
+-- | Set the traversibility of a tile in the grid
+setTraversible :: Grid -> Int -> Int -> Bool -> Grid
+setTraversible grid row col newTraversible = grid {tiles = map (\t -> if place t == place (getTile grid row col) then t {traversible = newTraversible} else t) (tiles grid)}
+
+-- | Set the elevation of a tile in the grid
+setElevation :: Grid -> Int -> Int -> Float -> Grid
+setElevation grid row col newElevation = grid {tiles = map (\t -> if place t == place (getTile grid row col) then t {elevation = newElevation} else t) (tiles grid)}
+
+-- | Set the tile at the given row and column in the grid
+setTile :: Grid -> Int -> Int -> Tile -> Grid
+setTile grid row col newTile = grid {tiles = map (\t -> if place t == place (getTile grid row col) then newTile else t) (tiles grid)}
+
+testTable :: Table ()
+testTable =
+    surroundingBorder False $
+    table [ [str "test", str "table"]
+          , [str "is",    str "here"]
+          ]
+
+drawTable :: Table () -> Widget ()
+drawTable table = C.center $ renderTable table
+
+drawTile :: Tile -> String
+drawTile tile = if traversible tile then show (elevation tile) else "X"
+
+gridTable :: Grid -> Table ()
+gridTable grid = table (map (\r -> map (\c -> str (drawTile (getTile grid r c))) [0..cols grid - 1]) [0..rows grid - 1])
+
+drawGrid :: Grid -> Widget ()
+drawGrid grid = C.center $ renderTable (gridTable grid)

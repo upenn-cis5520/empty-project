@@ -106,6 +106,7 @@ executable project-cis5520-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       project-cis5520
+    , brick
 
 
 test-suite project-cis5520-test
