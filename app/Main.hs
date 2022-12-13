@@ -1,24 +1,149 @@
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Graph
-import GridMap (Place, Tile, Grid, getTile, edge, gridToGraph, adjacents, simpleGrid, getNeighbors, setNeighbors, drawGrid)
+import GridMap 
+    ( Grid(..)
+    , simpleGrid    
+    )   
+import Editor 
+    ( editorApp
+    , drawGrid
+    )
 
+import qualified Data.Text as T
+import Lens.Micro ((^.))
+import Lens.Micro.TH
+#if !(MIN_VERSION_base(4,11,0))
+import Data.Monoid ((<>))
+#endif
+
+import qualified Graphics.Vty as V
 import Brick
-  ( App(..), AttrMap, BrickEvent(..), EventM, Widget
-  , customMain, neverShowCursor, attrName, simpleMain
-  , halt
-  , hLimit, vLimit, vBox, hBox
-  , padRight, padLeft, padTop, padAll, Padding(..)
-  , withBorderStyle
-  , str
-  , attrMap, withAttr, emptyWidget, AttrName, on, fg
-  , (<+>)
+import Brick.Forms
+  ( Form
+  , newForm
+  , formState
+  , formFocus
+  , setFieldValid
+  , renderForm
+  , handleFormEvent
+  , invalidFields
+  , allFieldsValid
+  , focusedFormInputAttr
+  , invalidFormInputAttr
+  , checkboxField
+  , radioField
+  , editShowableField
+  , editTextField
+  , editPasswordField
+  , (@@=)
   )
-import Brick.BChan (newBChan, writeBChan)
+import Brick.Focus
+  ( focusGetCurrent
+  , focusRingCursor
+  )
+import qualified Brick.Widgets.Edit as E
 import qualified Brick.Widgets.Border as B
-import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.Center as C
-import qualified Brick.Util as U
+
+data Name = RowsField
+          | ColumnsField
+          deriving (Eq, Ord, Show)
+
+data Handedness = LeftHanded | RightHanded | Ambidextrous
+                deriving (Show, Eq)
+
+data GridInfo =
+    GridInfo { _rowCount      :: Int
+             , _columnCount       :: Int
+             }
+             deriving (Show)
+
+makeLenses ''GridInfo
+
+-- This form is covered in the Brick User Guide; see the "Input Forms"
+-- section.
+mkForm :: GridInfo -> Form GridInfo e Name
+mkForm =
+    let label s w = padBottom (Pad 1) $
+                    (vLimit 1 $ hLimit 15 $ str s <+> fill ' ') <+> w
+    in newForm [
+                 label "Rows" @@=
+                   editShowableField rowCount RowsField
+               , label "Columns" @@=
+                   editShowableField columnCount ColumnsField
+               ]
+
+theMap :: AttrMap
+theMap = attrMap V.defAttr
+  [ (E.editAttr, V.white `on` V.black)
+  , (E.editFocusedAttr, V.black `on` V.yellow)
+  , (invalidFormInputAttr, V.white `on` V.red)
+  , (focusedFormInputAttr, V.black `on` V.yellow)
+  ]
+
+draw :: Form GridInfo e Name -> [Widget Name]
+draw f = [C.vCenter $ C.hCenter form <=> C.hCenter help]
+    where
+        form = B.border $ padTop (Pad 1) $ hLimit 50 $ renderForm f
+        help = padTop (Pad 1) $ B.borderWithLabel (str "Help") body
+        body = str $ "- Name is free-form text\n" <>
+                     "- Age must be an integer (try entering an\n" <>
+                     "  invalid age!)\n" <>
+                     "- Handedness selects from a list of options\n" <>
+                     "- The last option is a checkbox\n" <>
+                     "- Enter/Esc quit, mouse interacts with fields"
+
+app :: App (Form GridInfo e Name) e Name
+app =
+    App { appDraw = draw
+        , appHandleEvent = \ev -> do
+            f <- gets formFocus
+            case ev of
+                VtyEvent (V.EvResize {}) -> return ()
+                VtyEvent (V.EvKey V.KEsc []) -> halt
+                VtyEvent (V.EvKey V.KEnter []) -> halt
+                _ -> do
+                    handleFormEvent ev
+
+                    -- Example of external validation:
+                    -- Require age field to contain a value that is at least 18.
+                    st <- gets formState
+                    modify $ setFieldValid (st^.rowCount > 0) RowsField
+                    modify $ setFieldValid (st^.columnCount > 0) ColumnsField
+
+        , appChooseCursor = focusRingCursor formFocus
+        , appStartEvent = return ()
+        , appAttrMap = const theMap
+        }
+
 main :: IO ()
 main = do
-    simpleMain (drawGrid (simpleGrid 3 3))
+    let buildVty = do
+          v <- V.mkVty =<< V.standardIOConfig
+          V.setMode (V.outputIface v) V.Mouse True
+          return v
+
+        initialGridInfo = GridInfo { _rowCount = 5
+                                   , _columnCount = 5
+                                   }
+        f = mkForm initialGridInfo
+
+    initialVty <- buildVty
+    f' <- customMain initialVty buildVty Nothing app f
+
+    putStrLn "The starting form state was:"
+    print initialGridInfo
+
+    putStrLn "The final form state was:"
+    print $ formState f'
+
+    if allFieldsValid f'
+       then let initialGrid = simpleGrid (_rowCount (formState f')) (_columnCount (formState f'))
+            in do
+                simpleMain (drawGrid initialGrid)
+       else putStrLn $ "The final form had invalid inputs: " <> show (invalidFields f')
+    
+    
