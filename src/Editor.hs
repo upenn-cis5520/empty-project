@@ -9,7 +9,9 @@ module Editor
     , initEditor
     ) where
 
-import GridMap (Grid(..), Tile(..), getTile, gridToGraph, adjacents, simpleGrid, getNeighbors, setNeighbors, gridFromList)
+import GridMap ( Grid(..), Tile(..)
+               , getTile, gridToGraph, adjacents, simpleGrid, getNeighbors
+               , setNeighbors, setTraversible, setElevation, gridFromList)
 
 import Control.Monad (forever, void)
 import Lens.Micro.TH

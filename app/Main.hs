@@ -5,7 +5,8 @@ module Main where
 
 import GridMap 
     ( Grid(..)
-    , simpleGrid    
+    , simpleGrid  
+    , setTraversible  
     )   
 import Editor 
     ( EditState(..)
@@ -138,7 +139,7 @@ main = do
     print $ formState f'
 
     if allFieldsValid f'
-       then let initialGrid = simpleGrid (_rowCount (formState f')) (_columnCount (formState f'))
+       then let initialGrid = setTraversible (simpleGrid (_rowCount (formState f')) (_columnCount (formState f'))) 1 1 False
             in initEditor initialGrid
        else putStrLn $ "The final form had invalid inputs: " <> show (invalidFields f')
     

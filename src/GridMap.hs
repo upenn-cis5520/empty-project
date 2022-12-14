@@ -1,7 +1,7 @@
 module GridMap 
   (Place, Tile(..), Grid(..)
   , getTile, gridToGraph, adjacents, simpleGrid, getNeighbors, setNeighbors
-  -- , setTraversible, setElevation, setTile
+  , setTraversible, setElevation, setTile
   , gridFromList
   -- , testTable, drawTable
   ) where
@@ -65,11 +65,7 @@ updateNeighbors grid = grid {neighbors = Map.fromList (map (\t -> (place t, getN
 
 -- | Set the traversibility of a tile in the grid, updating the neighbors of the tile and its neighbors
 setTraversible :: Grid -> Int -> Int -> Bool -> Grid
-setTraversible grid row col newTraversible = grid {tiles = map (\t -> 
-  if place t == place (getTile grid row col) 
-    then t {traversible = newTraversible} 
-    else t) 
-    (tiles grid), neighbors = Map.insert (row * cols grid + col) (getNeighbors grid row col) (neighbors grid)}
+setTraversible grid row col newTraversible = updateNeighbors $ grid {tiles = map (\t -> if place t == place (getTile grid row col) then t {traversible = newTraversible} else t) (tiles grid)}
 -- | Set the elevation of a tile in the grid
 setElevation :: Grid -> Int -> Int -> Float -> Grid
 setElevation grid row col newElevation = grid {tiles = map (\t -> if place t == place (getTile grid row col) then t {elevation = newElevation} else t) (tiles grid)}
