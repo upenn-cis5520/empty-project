@@ -8,8 +8,11 @@ import GridMap
     , simpleGrid    
     )   
 import Editor 
-    ( editorApp
+    ( EditState(..)
+    , TileInfo(..)
+    , editorApp
     , drawGrid
+    , initEditor
     )
 
 import qualified Data.Text as T
@@ -52,8 +55,6 @@ data Name = RowsField
           | ColumnsField
           deriving (Eq, Ord, Show)
 
-data Handedness = LeftHanded | RightHanded | Ambidextrous
-                deriving (Show, Eq)
 
 data GridInfo =
     GridInfo { _rowCount      :: Int
@@ -89,13 +90,9 @@ draw f = [C.vCenter $ C.hCenter form <=> C.hCenter help]
     where
         form = B.border $ padTop (Pad 1) $ hLimit 50 $ renderForm f
         help = padTop (Pad 1) $ B.borderWithLabel (str "Help") body
-        body = str $ "- Name is free-form text\n" <>
-                     "- Age must be an integer (try entering an\n" <>
-                     "  invalid age!)\n" <>
-                     "- Handedness selects from a list of options\n" <>
-                     "- The last option is a checkbox\n" <>
-                     "- Enter/Esc quit, mouse interacts with fields"
-
+        body = str $ "- Enter number of rows and columns\n" <>
+                     "- Must be an integers\n" <>
+                     "- Press Enter to continue"
 app :: App (Form GridInfo e Name) e Name
 app =
     App { appDraw = draw
@@ -142,8 +139,7 @@ main = do
 
     if allFieldsValid f'
        then let initialGrid = simpleGrid (_rowCount (formState f')) (_columnCount (formState f'))
-            in do
-                simpleMain (drawGrid initialGrid)
+            in initEditor initialGrid
        else putStrLn $ "The final form had invalid inputs: " <> show (invalidFields f')
     
     
