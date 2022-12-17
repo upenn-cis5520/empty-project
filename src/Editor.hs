@@ -11,7 +11,8 @@ module Editor
 
 import GridMap ( Grid(..), Tile(..)
                , getTile, gridToGraph, adjacents, simpleGrid, getNeighbors
-               , setNeighbors, setTraversible, setElevation, gridFromList)
+               , setNeighbors, setTraversible, setElevation, setTile
+               , gridFromList)
 
 import Control.Monad (forever, void)
 import Lens.Micro ((^.))
@@ -56,15 +57,17 @@ import qualified Brick.Widgets.Edit as E
 data Name = ElevationField
           | TraversibleField
           | GridField
-          | CursorField
+          | CurRowField
+          | CurColField
           deriving (Eq, Ord, Show)
 
 
 
-data GridInfo = TileInfo
-  { _elevationVal :: Int
+data GridInfo = GridInfo
+  { _elevationVal :: Float
   , _isTraversible :: Bool
-  , _cursor :: (Int, Int)
+  , _curRow :: Int
+  , _curCol :: Int
   , _grid :: Grid
   }
 
@@ -85,8 +88,10 @@ mkForm =
                    editShowableField elevationVal ElevationField
                , label "" @@=
                    checkboxField isTraversible TraversibleField "Traversible?"
-               , label "cursor" @@=
-                   editShowableField cursor CursorField
+               , label "Current Row" @@=
+                   editShowableField curRow CurRowField
+                , label "Current Column" @@=
+                   editShowableField curCol CurColField
                
                ]
 
@@ -151,9 +156,27 @@ handleEvent ev = do
     case ev of
       VtyEvent (V.EvResize {}) -> return ()
       VtyEvent (V.EvKey V.KEsc []) -> halt
-      VtyEvent (V.EvKey V.KEnter []) -> halt
+      VtyEvent (V.EvKey V.KEnter []) -> updateGrid
       _ -> do
           handleFormEvent ev
+          st <- gets formState
+          modify $ setFieldValid (st^.curRow >= 0 && st^.curRow < rows (st^.grid)) CurRowField
+          modify $ setFieldValid (st^.curCol >= 0 && st^.curCol < cols (st^.grid)) CurColField
+      where
+          updateGrid = do
+              s <- B.get
+              if allFieldsValid s
+                  then do
+                    let f = formState s
+                    let grid = _grid f
+                    let r = _curRow f
+                    let c = _curCol f
+                    let tile = getTile grid r c
+                    let newTile = tile {elevation = _elevationVal f, traversible = _isTraversible f}
+                    let newGrid = setTile grid r c newTile
+                    B.put s {formState = f {_grid = newGrid}}
+                    return ()
+                  else return ()
 
 
 
@@ -169,5 +192,5 @@ initEditor grid = do
     let buildVty = V.mkVty V.defaultConfig
     initialVty <- buildVty
     let app = editorApp
-    let state = mkForm (TileInfo 0 True (0, 0) grid)
+    let state = mkForm (GridInfo 0 True 0 0 grid)
     void $ customMain initialVty buildVty (Just chan) app state
