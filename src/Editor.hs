@@ -64,15 +64,6 @@ data EditState = EditState
   , form :: Form TileInfo () Name
   }
 
--- | Move the cursor up, but not outside the grid.
--- moveCursorUp :: EditState -> EventM Name EditState ()
--- moveCursorUp s = do
---     let (r, c) = cursor s
---     if r > 0
---         then continue s { cursor = (r - 1, c) }
---         else continue s
-
--- left :: EditState -> EditState
 
 makeLenses ''TileInfo
 
@@ -98,17 +89,7 @@ gridTable grid = table (map (\r -> map (\c -> str (drawTile (getTile grid r c)))
 drawGrid :: Grid -> Widget Name
 drawGrid grid = C.center $ renderTable (gridTable grid)
 
--- draw :: Form UserInfo e () -> [Widget ()]
--- draw f = [C.vCenter $ C.hCenter form <=> C.hCenter help]
---     where
---         form = B.border $ padTop (Pad 1) $ hLimit 50 $ renderForm f
---         help = padTop (Pad 1) $ B.borderWithLabel (str "Help") body
---         body = str $ "- Name is free-form text\n" <>
---                      "- Age must be an integer (try entering an\n" <>
---                      "  invalid age!)\n" <>
---                      "- Handedness selects from a list of options\n" <>
---                      "- The last option is a checkbox\n" <>
---                      "- Enter/Esc quit, mouse interacts with fields"
+
 drawEditor :: EditState -> [Widget Name]
 drawEditor s = [drawGrid (grid s) <=> drawForm (form s) <=> drawCursor (cursor s)]
     where 
@@ -123,10 +104,42 @@ editorApp = B.App
   , B.appAttrMap = const $ attrMap V.defAttr []
   }
 
+-- | Move the cursor by the given amount, while keeping it inside of bounds
+moveCursor :: (Int, Int) -> EventM Name EditState ()
+moveCursor (r, c) = do
+    s <- B.get
+    let (r', c') = cursor s
+    let newCursor = (r' + r, c' + c)
+    let (r'', c'') = newCursor
+    let (rows', cols') = (rows (grid s), cols (grid s))
+    if r'' >= 0 && r'' < rows' && c'' >= 0 && c'' < cols'
+        then B.put s {cursor = newCursor}
+        else return ()
+
+
 handleEvent :: B.BrickEvent Name e -> EventM Name EditState ()
-handleEvent (B.VtyEvent (V.EvKey V.KEsc [])) = B.halt
-handleEvent (B.VtyEvent (V.EvKey (V.KChar 'q') [])) = B.halt
--- handleEvent (B.VtyEvent (V.EvKey (V.KUp) [])) = moveCursorUp
+handleEvent ev = case ev of
+    B.VtyEvent (V.EvKey V.KUp []) -> moveCursor (-1, 0)
+    B.VtyEvent (V.EvKey V.KDown []) -> moveCursor (1, 0)
+    B.VtyEvent (V.EvKey V.KLeft []) -> moveCursor (0, -1)
+    B.VtyEvent (V.EvKey V.KRight []) -> moveCursor (0, 1)
+    B.VtyEvent (V.EvKey (V.KChar 'q') []) -> B.halt 
+    -- B.VtyEvent (V.EvKey (V.KChar 'e') []) -> do
+    --     s <- B.get
+    --     let (r, c) = cursor s
+    --     let tile = getTile (grid s) r c
+    --     let newTile = tile {elevation = elevationVal (formState (form s))}
+    --     let newGrid = setElevation (grid s) r c newTile
+    --     B.put s {grid = newGrid}
+    -- B.VtyEvent (V.EvKey (V.KChar 't') []) -> do
+    --     s <- B.get
+    --     let (r, c) = cursor s
+    --     let tile = getTile (grid s) r c
+    --     let newTile = tile {traversible = isTraversible (formState (form s))}
+    --     let newGrid = setTraversible (grid s) r c newTile
+    --     B.put s {grid = newGrid}
+
+
 
 
 initEditor :: Grid -> IO ()
