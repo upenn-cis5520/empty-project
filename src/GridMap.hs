@@ -32,11 +32,11 @@ getTile :: Grid -> Int -> Int -> Tile -- row <= rows, col <= cols
 getTile grid row col = tiles grid !! (row * cols grid + col)
 
 -- | Create an edge between two tiles
-edge :: Tile -> Tile -> Edge
+edge :: Tile -> Tile -> Edge Float
 edge t1 t2 = E (place t1) (place t2) (abs (elevation t1 - elevation t2))
 
 -- | Turn a grid into a graph by iterating through the grid and creating edges between traversible neighbors with weight equal to the difference in elevation
-gridToGraph :: Grid -> GraphMap
+gridToGraph :: Grid -> GraphMap Float
 gridToGraph grid = foldl (\m t -> if traversible t then Map.insert (place t) (map (edge t) (filter traversible (map (\p -> getTile grid (p `div` cols grid) (p `mod` cols grid)) (neighbors grid Map.! (place t))))) m else m) Map.empty (tiles grid)
 
 -- | Get the places of the tiles adjacent to the given tile

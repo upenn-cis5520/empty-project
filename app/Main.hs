@@ -9,13 +9,12 @@ import GridMap
     , setTraversible  
     )   
 import Editor 
-    ( EditState(..)
-    , TileInfo(..)
-    , editorApp
+    ( 
+      editorApp
     , drawGrid
     , initEditor
     )
-
+import qualified Editor as E
 import qualified Data.Text as T
 import Lens.Micro ((^.))
 import Lens.Micro.TH
