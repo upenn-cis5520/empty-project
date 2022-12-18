@@ -45,7 +45,6 @@ import Brick.Focus
   , focusRingCursor
   )  
 import qualified Brick.Widgets.Border as B
-import qualified Brick.Widgets.Center as B
 import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.Center as C
 import qualified Brick.Util as U
@@ -60,7 +59,11 @@ data Name = ElevationField
           | CurRowField
           | CurColField
           deriving (Eq, Ord, Show)
-
+blockedAttr = attrName "blocked"
+lowAttr = attrName "low"
+mediumAttr = attrName "medium"
+highAttr = attrName "high"
+selectedAttr = attrName "selected"
 
 
 data GridInfo = GridInfo
@@ -98,11 +101,18 @@ mkForm =
 drawTable :: Table Name -> Widget Name
 drawTable table = C.center $ renderTable table
 
-drawTile :: Tile -> String
-drawTile tile = if traversible tile then show (elevation tile) else "X"
+drawTile :: Tile -> Widget Name
+drawTile t = case (traversible t, elevation t) of
+    (True, elev) -> withAttr heightAttr $ (str . show) elev
+    (False, _) -> withAttr blockedAttr $ str "X"
+    where
+        heightAttr = case elevation t of
+            elev | elev < -5 -> lowAttr
+                 | elev < 5 -> mediumAttr
+                 | otherwise -> highAttr
 
 gridTable :: Grid -> Table Name
-gridTable grid = table (map (\r -> map (\c -> str (drawTile (getTile grid r c))) [0..cols grid - 1]) [0..rows grid - 1])
+gridTable grid = table (map (\r -> map (\c -> drawTile (getTile grid r c)) [0..cols grid - 1]) [0..rows grid - 1])
 
 drawGrid :: Grid -> Widget Name
 drawGrid grid = C.center $ renderTable (gridTable grid)
@@ -125,6 +135,10 @@ theMap = attrMap V.defAttr
   , (E.editFocusedAttr, V.black `on` V.yellow)
   , (invalidFormInputAttr, V.white `on` V.red)
   , (focusedFormInputAttr, V.black `on` V.yellow)
+  , (blockedAttr, V.white `on` V.black)
+  , (lowAttr, V.white `on` V.red)
+  , (mediumAttr, V.white `on` V.yellow)
+  , (highAttr, V.white `on` V.green)
   ]
 
 editorApp :: B.App (Form GridInfo e Name) e Name
