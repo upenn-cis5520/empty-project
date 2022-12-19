@@ -49,6 +49,7 @@ import qualified Brick.Widgets.Border.Style as BS
 import qualified Brick.Widgets.Center as C
 import qualified Brick.Util as U
 import qualified Graphics.Vty as V
+import qualified Brick.Types as B
 import Data.Sequence (Seq)
 import qualified Data.Sequence as S
 import qualified Brick.Widgets.Edit as E
@@ -74,11 +75,6 @@ data GridInfo = GridInfo
   , _grid :: Grid
   }
 
--- data EditState = EditState
---   { 
---     grid :: Grid
---   , form :: Form TileInfo () Name
---   }
 
 
 makeLenses ''GridInfo
@@ -112,7 +108,9 @@ drawTile t = case (traversible t, elevation t) of
                  | otherwise -> highAttr
 
 gridTable :: Grid -> Table Name
-gridTable grid = table (map (\r -> map (\c -> drawTile (getTile grid r c)) [0..cols grid - 1]) [0..rows grid - 1])
+gridTable grid = table $ 
+  map (\r -> map (\c -> drawTile (getTile grid r c)) [0..cols grid - 1]) 
+  [0..rows grid - 1]
 
 drawGrid :: Grid -> Widget Name
 drawGrid grid = C.center $ renderTable (gridTable grid)
@@ -150,17 +148,6 @@ editorApp = B.App
   , B.appAttrMap = const theMap
   }
 
--- | Move the cursor by the given amount, while keeping it inside of bounds
--- moveCursor :: (Int, Int) -> EventM Name EditState ()
--- moveCursor (r, c) = do
---     s <- B.get
---     let (r', c') = cursor s
---     let newCursor = (r' + r, c' + c)
---     let (r'', c'') = newCursor
---     let (rows', cols') = (rows (grid s), cols (grid s))
---     if r'' >= 0 && r'' < rows' && c'' >= 0 && c'' < cols'
---         then B.put s {cursor = newCursor}
---         else return ()
 
 
 handleEvent :: B.BrickEvent Name e -> EventM Name (Form GridInfo e Name) ()
@@ -207,4 +194,4 @@ initEditor grid = do
     initialVty <- buildVty
     let app = editorApp
     let state = mkForm (GridInfo 0 True 0 0 grid)
-    void $ customMain initialVty buildVty (Just chan) app state
+    void $ customMain initialVty buildVty (Just chan) app state 

@@ -15,7 +15,6 @@ import Editor
     , initEditor
     )
 import qualified Editor as E
-import qualified Data.Text as T
 import Lens.Micro ((^.))
 import Lens.Micro.TH
 #if !(MIN_VERSION_base(4,11,0))
@@ -40,7 +39,6 @@ import Brick.Forms
   , radioField
   , editShowableField
   , editTextField
-  , editPasswordField
   , (@@=)
   )
 import Brick.Focus
@@ -64,8 +62,6 @@ data GridInfo =
 
 makeLenses ''GridInfo
 
--- This form is covered in the Brick User Guide; see the "Input Forms"
--- section.
 mkForm :: GridInfo -> Form GridInfo e Name
 mkForm =
     let label s w = padBottom (Pad 1) $
@@ -131,14 +127,8 @@ main = do
     initialVty <- buildVty
     f' <- customMain initialVty buildVty Nothing app f
 
-    putStrLn "The starting form state was:"
-    print initialGridInfo
-
-    putStrLn "The final form state was:"
-    print $ formState f'
-
     if allFieldsValid f'
-       then let initialGrid = setTraversible (simpleGrid (_rowCount (formState f')) (_columnCount (formState f'))) 1 1 False
+       then let initialGrid = (simpleGrid (_rowCount (formState f')) (_columnCount (formState f')))
             in initEditor initialGrid
        else putStrLn $ "The final form had invalid inputs: " <> show (invalidFields f')
     
