@@ -4,6 +4,7 @@ import Test.QuickCheck
 -- import qualified LuParser  as LP
 import qualified LuParserTest as LP
 import qualified LuEvaluatorTest as LE
+import qualified LuStepperTest as LS
 
 main :: IO ()
 main = do
@@ -12,7 +13,10 @@ main = do
     LP.qc
     putStrLn "*** Testing LuEvaluator ***"
     LE.test 
-
+    LE.qc
+    putStrLn "*** Testing LuStepper ***"
+    LS.test 
+    LS.qc
     putStrLn "*** Done Testing ***"
 
     --LE.qc
