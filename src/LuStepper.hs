@@ -1,5 +1,6 @@
 module LuStepper where
 
+import System.IO
 import LuSyntax
 import LuParser qualified
 import LuEvaluator
@@ -100,6 +101,7 @@ stepper = go initialStepper
     go ss = do
       prompt ss
       putStr (fromMaybe "Lu" (filename ss) ++ "> ")
+      hFlush stdout
       str <- getLine
       case List.uncons (words str) of
         -- load a file for stepping
