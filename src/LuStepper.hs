@@ -252,16 +252,16 @@ stepper = go initialStepper
 
 -------------------------- all properties and tests in this module  -----------------------------
 
-test_all :: IO Counts
-test_all = runTestTT $ TestList [test_index, test_update, test_resolveVar, test_evaluateNot, test_evaluateLen, test_exec, test_execStep]
+--test_all :: IO Counts
+--test_all = runTestTT $ TestList [test_index, test_update, test_resolveVar, test_evaluateNot, test_evaluateLen, test_exec, test_execStep]
 
 -- >>> runTestTT test_all
 
-qc :: IO ()
-qc = do
-  putStrLn "evalE_total"
-  quickCheckN 100 prop_evalE_total
-  putStrLn "step_total"
-  quickCheckN 100 prop_step_total
-  putStrLn "stepExec"
-  quickCheckN 100 prop_stepExec
+-- qc :: IO ()
+-- qc = do
+--   putStrLn "evalE_total"
+--   quickCheckN 100 prop_evalE_total
+--   putStrLn "step_total"
+--   quickCheckN 100 prop_step_total
+--   putStrLn "stepExec"
+--   quickCheckN 100 prop_stepExec

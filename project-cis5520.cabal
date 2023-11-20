@@ -71,6 +71,7 @@ test-suite project-cis5520-test
       Spec.hs
   other-modules:
       LuParserTest
+      LuEvaluatorTest
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N

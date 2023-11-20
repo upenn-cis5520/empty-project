@@ -1,15 +1,21 @@
 import Test.HUnit
 import Test.QuickCheck
-import qualified LuStepper as LS
-import qualified LuParser  as LP
-import qualified LuParserTest as P
+-- import qualified LuStepper as LS
+-- import qualified LuParser  as LP
+import qualified LuParserTest as LP
+import qualified LuEvaluatorTest as LE
 
 main :: IO ()
 main = do
     putStrLn "*** Testing LuParser ***"
-    P.test
-    P.qc
-    putStrLn "*** Testing ... ***"
+    LP.test
+    LP.qc
+    putStrLn "*** Testing LuEvaluator ***"
+    LE.test 
+
+    putStrLn "*** Done Testing ***"
+
+    --LE.qc
 --   putStrLn "*** Testing LuStepper ***"
 --   LS.test_all -- unit tests
 --   LS.qc       -- quickcheck properties
