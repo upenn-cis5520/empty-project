@@ -316,12 +316,12 @@ tParseFiles :: Test
 tParseFiles =
   "parse files" ~:
     TestList
-      [ "fact" ~: p "lu/fact.lu" wFact,
-        "test" ~: p "lu/test.lu" wTest,
-        "abs" ~: p "lu/abs.lu" wAbs,
-        "times" ~: p "lu/times.lu" wTimes,
-        "table" ~: p "lu/table.lu" wTable,
-        "bfs" ~: p "lu/bfs.lu" wBfs
+      [ "fact" ~: p "test/lu/fact.lu" wFact,
+        "test" ~: p "test/lu/test.lu" wTest,
+        "abs" ~: p "test/lu/abs.lu" wAbs,
+        "times" ~: p "test/lu/times.lu" wTimes,
+        "table" ~: p "test/lu/table.lu" wTable,
+        "bfs" ~: p "test/lu/bfs.lu" wBfs
       ]
   where
     p fn ast = do
