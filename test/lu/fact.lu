@@ -1,0 +1,11 @@
+n = 5
+f = 1
+while n > 0 do
+  x = n
+  z = f
+  while x > 1 do
+    f = z + f
+    x = x - 1
+  end
+  n = n - 1
+end
