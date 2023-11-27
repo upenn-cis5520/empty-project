@@ -36,3 +36,30 @@ in https://www.stackage.org/lts-21.6 by adding an entry to the
 use a library that is not on stackage, you'll need to update the common-stanza
 *and* add information to `stack.yaml` about where to find that library.
 
+## TODO 
+CP1:
+- [x] Define type `datatype`.
+- [x] Create bare-bones `LuTypeChecker` module.
+- [ ] Outline arbitrary and shrink for `LType`.
+- [ ] Unit tests for `synthesis`.
+- [ ] quickCheck tests for `synthesis`.
+- [ ] Unit tests for `checker`.
+- [ ] quickCheck tests for `checker`.
+- [ ] Outline function implementation in parser w/ unit tests.
+- [ ] Outline function implementation in evaluator w/ unit tests.
+
+CP2:
+- [ ] Implement arbitrary and shrink for `LType`.
+- [ ] Modify parser to parse functions.
+- [ ] Modify evaluator to evaluate functions.
+- [ ] Implement `checker`. 
+- [ ] Implement `synthesis`.
+- [ ] Augment parser to accept optional type signatures.
+- [ ] Add tests for union types with explicit type signatures.
+- [ ] Other things?
+- [ ] User Defined types?
+
+## Questions for Nick 
+- Should the typechecker error or return a boolean? We currently error so that we can provide more useful info.
+- Thinking of requiring user to add union type annotation for tables, otherwise we reject. Seem reasonable?
+
