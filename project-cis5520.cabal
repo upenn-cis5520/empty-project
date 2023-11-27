@@ -45,6 +45,8 @@ library
       LuEvaluator
       LuParser
       LuSyntax 
+      LuTypeChecker
+      LuTypes
       State
       Parser
   hs-source-dirs:

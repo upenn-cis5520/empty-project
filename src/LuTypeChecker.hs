@@ -1,17 +1,10 @@
-module LuTypeCheck where
+module LuTypeChecker where
 
 import LuSyntax
 import State (State)
 import Data.Map (Map)
--- Potentially add Unknown, Any as we see fit. 
-data LType = 
-    Never 
-    | NilType
-    | IntType
-    | BooleanType
-    | TableType LType LType -- What about a table as a key??
-    | UnionType LType LType 
-    | FunctionType LType LType -- Partial Function 
+import LuTypes 
+
 
 isValueType :: LType -> Bool 
 isValueType = undefined
