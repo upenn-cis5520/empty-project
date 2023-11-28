@@ -6,6 +6,7 @@ data LType =
     Never 
     | NilType
     | IntType
+    | StringType
     | BooleanType
     | TableType LType LType -- What about a table as a key??
     | UnionType LType LType 
