@@ -15,6 +15,8 @@ Haskell packages typically divide their source code into three separate places:
   - The bulk of your code should be developed as a reusable library in 
     modules in the `src` directory. We've created [Lib.hs](src/Lib.hs) 
     for you to get started. You can add additional modules here.
+    If you do add new modules to this directory you should list them
+    in the [cabal file](https://github.com/upenn-cis5520/empty-project/blob/74ad761562bb89d20e99621a76f607048a09f62e/project-cis5520.cabal#L44).
   
   - The entry point for your executable is in [Main.hs](app/Main.hs). 
   
