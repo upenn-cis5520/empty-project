@@ -34,7 +34,7 @@ Finally, you can start a REPL with `stack ghci`.
 
 This project is designed to run with stackage: you can easily use any library
 in https://www.stackage.org/lts-21.6 by adding an entry to the
-`build-depends` list of the `common-stanza` in the cabal file. If you want to
+`build-depends` list of the `common-stanza` in the [cabal file](https://github.com/upenn-cis5520/empty-project/blob/837c81b6317cc11b824e2b5e87fd72eec1b2151e/project-cis5520.cabal#L23). If you want to
 use a library that is not on stackage, you'll need to update the common-stanza
 *and* add information to `stack.yaml` about where to find that library.
 
