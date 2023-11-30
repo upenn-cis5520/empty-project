@@ -1,3 +1,12 @@
 .stack-work/
 *~
 .DS_Store
+dist-newstyle/cache/compiler
+dist-newstyle/cache/config
+dist-newstyle/cache/elaborated-plan
+dist-newstyle/cache/improved-plan
+dist-newstyle/cache/plan.json
+dist-newstyle/cache/solver-plan
+dist-newstyle/cache/source-hashes
+dist-newstyle/cache/up-to-date
+dist-newstyle/tmp/environment.-24280/.ghc.environment.x86_64-mingw32-9.4.5
