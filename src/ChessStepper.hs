@@ -2,7 +2,7 @@ module ChessStepper (playMove, playMoves) where
 
 import ChessParser
 import ChessSyntax
-import qualified Control.Monad.State as S
+import Control.Monad.State qualified as S
 import Test.HUnit
 import Test.QuickCheck
 
@@ -41,7 +41,7 @@ printGame = undefined
 -------------------------
 -- Arbitrary definitions--
 -------------------------
-instance Arbitary Game where
+instance Arbitrary Game where
   arbitrary = undefined
 
 instance Arbitrary Move where

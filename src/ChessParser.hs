@@ -27,12 +27,12 @@ test_SingleMove =
       -- Test Pawn move with disambiguation
       parseSingleMove "e7e3" ~?= Right (NormalMove Pawn (Square 'e' 3) (Just (Both (Square 'e' 7))) (Promotion Nothing) (Capture False) (Check False) (Mate False)),
       -- Test King move
-      parseSingleMove "Ka1b4" ~?= Right (NormalMove King (Square 'a' 1) (Just (Both (Square 'b' 4))) (Promotion Nothing) (Capture False) (Check False) (Mate False)),
+      parseSingleMove "Ka1b4" ~?= Right (NormalMove King (Square 'b' 4) (Just (Both (Square 'a' 1))) (Promotion Nothing) (Capture False) (Check False) (Mate False)),
       -- Test Castling
       parseSingleMove "O-O" ~?= Right KingSideCastling,
       parseSingleMove "O-O-O" ~?= Right QueenSideCastling,
       -- Test Pawn Promotion
-      parseSingleMove "e7a=Q" ~?= Right (NormalMove Pawn (Square 'e' 7) (Just (File 'a')) (Promotion (Just Queen)) (Capture False) (Check False) (Mate False))
+      parseSingleMove "ae7=Q" ~?= Right (NormalMove Pawn (Square 'e' 7) (Just (File 'a')) (Promotion (Just Queen)) (Capture False) (Check False) (Mate False))
     ]
 
 -- Space separated moves parser
