@@ -1,5 +1,6 @@
 module Parser
   ( parseMoves,
+    parseSingleMove,
   )
 where
 
@@ -9,25 +10,39 @@ import Test.HUnit (Test (TestCase, TestList), runTestTT, (~:), (~?=))
 import Text.Parsec (ParseError, char, digit, eof, oneOf, option, optionMaybe, parse, spaces, string, try)
 import Text.Parsec.String (Parser)
 
-data Piece = Pawn | Knight | Bishop | Rook | Queen | King deriving (Show, Eq)
+data Piece = Pawn | Knight | Bishop | Rook | Queen | King deriving (Eq, Show)
 
-data Square = Square Char Int deriving (Show, Eq)
+data Color = White | Black deriving (Eq, Show)
 
-data MoveType = NormalMove | KingsideCastling | QueensideCastling deriving (Show, Eq)
+type File = Char
 
-data Move = Move
-  { moveType :: MoveType,
-    piece :: Maybe Piece,
-    fromSquare :: Maybe Square, -- move from square
-    toSquare :: Maybe Square, -- destination square
-    promotion :: Maybe Piece,
-    isCapture :: Bool,
-    isCheck :: Bool,
-    isCheckmate :: Bool
-  }
+type Rank = Int
+
+data Square = Square File Rank deriving (Eq, Show)
+
+newtype Promotion = Promotion (Maybe Piece) deriving (Eq, Show)
+
+newtype Capture = Capture Bool deriving (Eq, Show)
+
+newtype Check = Check Bool deriving (Eq, Show)
+
+newtype Mate = Mate Bool deriving (Eq, Show)
+
+-- the square is the destination
+data Move
+  = NormalMove Piece Square (Maybe Disambiguation) Promotion Capture Check Mate
+  | KingSideCastling
+  | QueenSideCastling
+  deriving (Eq, Show)
+
+data Disambiguation
+  = File File
+  | Rank Rank
+  | Both Square
   deriving (Show, Eq)
 
--- Given a space separated moves and return a list of Moves
+-- Using https://en.wikipedia.org/wiki/Algebraic_notation_(chess) for moves
+-- Given pace separated moves, return a list of Moves
 parseMoves :: String -> Either ParseError [Move]
 parseMoves = parse movesParser ""
 
@@ -39,29 +54,16 @@ test_SingleMove :: Test
 test_SingleMove =
   TestList
     [ -- Test Pawn move
-      fmap moveType (parseSingleMove "e7e3") ~?= Right NormalMove,
-      fmap piece (parseSingleMove "e7e3") ~?= Right (Just Pawn),
-      fmap fromSquare (parseSingleMove "e7e3") ~?= Right (Just (Square 'e' 7)),
-      fmap toSquare (parseSingleMove "e7e3") ~?= Right (Just (Square 'e' 3)),
-      fmap isCheck (parseSingleMove "e7e3") ~?= Right False,
-      fmap toSquare (parseSingleMove "e7e3") ~?= Right (Just (Square 'e' 3)),
+      parseSingleMove "e3" ~?= Right (NormalMove Pawn (Square 'e' 3) Nothing (Promotion Nothing) (Capture False) (Check False) (Mate False)),
+      -- Test Pawn move with disambiguation
+      parseSingleMove "e7e3" ~?= Right (NormalMove Pawn (Square 'e' 3) (Just (Both (Square 'e' 7))) (Promotion Nothing) (Capture False) (Check False) (Mate False)),
       -- Test King move
-      fmap moveType (parseSingleMove "Ka1b4") ~?= Right NormalMove,
-      fmap piece (parseSingleMove "Ka1b4") ~?= Right (Just King),
-      fmap fromSquare (parseSingleMove "Ka1b4") ~?= Right (Just (Square 'a' 1)),
-      fmap toSquare (parseSingleMove "Ka1b4") ~?= Right (Just (Square 'b' 4)),
+      parseSingleMove "Ka1b4" ~?= Right (NormalMove King (Square 'a' 1) (Just (Both (Square 'b' 4))) (Promotion Nothing) (Capture False) (Check False) (Mate False)),
       -- Test Castling
-      fmap moveType (parseSingleMove "O-O") ~?= Right KingsideCastling,
-      fmap moveType (parseSingleMove "O-O-O") ~?= Right QueensideCastling,
+      parseSingleMove "O-O" ~?= Right KingSideCastling,
+      parseSingleMove "O-O-O" ~?= Right QueenSideCastling,
       -- Test Pawn Promotion
-      fmap moveType (parseSingleMove "e7a8=Q") ~?= Right NormalMove,
-      fmap piece (parseSingleMove "e7a8=Q") ~?= Right (Just Pawn),
-      fmap fromSquare (parseSingleMove "e7a8=Q") ~?= Right Nothing,
-      fmap toSquare (parseSingleMove "e7a8=Q") ~?= Right (Just (Square 'a' 8)),
-      fmap promotion (parseSingleMove "e7a8=Q") ~?= Right (Just Queen),
-      fmap promotion (parseSingleMove "e7a8=N") ~?= Right (Just Knight),
-      fmap promotion (parseSingleMove "e7a8=R") ~?= Right (Just Rook),
-      fmap promotion (parseSingleMove "e7a8=B") ~?= Right (Just Bishop)
+      parseSingleMove "e7a=Q" ~?= Right (NormalMove Pawn (Square 'e' 7) (Just (File 'a')) (Promotion (Just Queen)) (Capture False) (Check False) (Mate False))
     ]
 
 -- Space separated moves parser
