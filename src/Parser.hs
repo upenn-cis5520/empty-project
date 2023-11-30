@@ -1,6 +1,17 @@
 module Parser
   ( parseMoves,
     parseSingleMove,
+    Piece,
+    Color,
+    File,
+    Rank,
+    Square (..),
+    Promotion (..),
+    Capture (..),
+    Check (..),
+    Mate (..),
+    Move (..),
+    Disambiguation (..),
   )
 where
 
