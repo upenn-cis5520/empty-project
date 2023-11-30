@@ -24,6 +24,10 @@ newtype Check = Check Bool deriving (Eq, Show)
 
 newtype Mate = Mate Bool deriving (Eq, Show)
 
+type Board = Map Square Piece
+
+data Game = Game Board Color deriving (Eq, Show)
+
 -- the square is the destination
 data Move
   = NormalMove Piece Square (Maybe Disambiguation) Promotion Capture Check Mate
@@ -37,6 +41,3 @@ data Disambiguation
   | Both Square
   deriving (Show, Eq)
 
-type Board = Map Square Piece
-
-data Game = Game Board Color deriving (Eq, Show)

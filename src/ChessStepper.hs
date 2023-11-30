@@ -3,6 +3,8 @@ module ChessStepper (playMove, playMoves) where
 import ChessParser
 import ChessSyntax
 import qualified Control.Monad.State as S
+import Test.HUnit
+import Test.QuickCheck
 
 -- Given a player, check if they are in check
 isCheck :: Move -> S.State Game Bool
@@ -35,6 +37,23 @@ createGame = undefined
 -- Print the current Game
 printGame :: S.State Game ()
 printGame = undefined
+
+-------------------------
+-- Arbitrary definitions--
+-------------------------
+instance Arbitary Game where
+  arbitrary = undefined
+
+instance Arbitrary Move where
+  arbitrary = undefined
+
+-- Check if the game board changes after a move
+prop_validMove :: Game -> Move -> Property
+prop_validMove = undefined
+
+-------------
+-- Stepper --
+-------------
 
 data Stepper = Stepper
   { game :: Game,
