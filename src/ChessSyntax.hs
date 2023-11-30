@@ -1,5 +1,8 @@
 module ChessSyntax where
 
+import Data.Map (Map, (!?))
+import Data.Map qualified as Map
+
 -- Using https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
 -- Details the moves from Parser
 
@@ -33,3 +36,7 @@ data Disambiguation
   | Rank Rank
   | Both Square
   deriving (Show, Eq)
+
+type Board = Map Square Piece
+
+data Game = Game Board Color deriving (Eq, Show)
