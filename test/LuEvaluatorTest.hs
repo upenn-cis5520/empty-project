@@ -244,6 +244,7 @@ prop_evalE_total e s = case evaluate e s of
   BoolVal b -> b `seq` True
   StringVal s -> s `seq` True
   TableVal n -> n `seq` True
+  FunctionVal ps rt b -> ps `seq` rt `seq` b `seq` True
 
 qc :: IO ()
 qc = do

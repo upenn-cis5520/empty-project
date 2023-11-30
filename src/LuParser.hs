@@ -3,6 +3,7 @@ module LuParser where
 import Control.Applicative
 import Data.Char qualified as Char
 import LuSyntax
+import LuTypes (LType)
 import Parser (Parser)
 import Parser qualified as P
 import Test.HUnit (Assertion, Counts, Test (..), assert, runTestTT, (~:), (~?=))
@@ -72,6 +73,7 @@ expP = compP
         <|> Var <$> varP
         <|> parens expP
         <|> Val <$> valueP
+        
 
 -- | Parse an operator at a specified precedence level
 opAtLevel :: Int -> Parser (Expression -> Expression -> Expression)
@@ -148,6 +150,24 @@ bopP =
     <|> constP "<=" Le
     <|> constP "<" Lt
     <|> constP ".." Concat
+
+parameterP :: Parser Parameter
+parameterP = undefined 
+
+parametersP :: Parser [Parameter]
+parametersP = undefined 
+
+lTypeP :: Parser LType 
+lTypeP = undefined
+
+functionP :: Parser Value 
+functionP = undefined
+
+callP :: Parser Expression
+callP = undefined
+
+returnP :: Parser Statement 
+returnP = undefined 
 
 tableConstP :: Parser Expression
 tableConstP = TableConst <$> braces (P.sepBy fieldP (wsP (P.char ',')))

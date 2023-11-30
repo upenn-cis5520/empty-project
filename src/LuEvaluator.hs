@@ -124,6 +124,7 @@ evalE (Op1 o e) = do
   e' <- evalE e
   evalOp1 o e'
 evalE (TableConst _fs) = evalTableConst _fs
+evalE (Call fv ps) = undefined
 
 fieldToPair :: TableField -> State Store (Value, Value)
 fieldToPair (FieldName n exp) = do
@@ -216,6 +217,7 @@ evalS (Assign v e) = do
     Just ref -> update ref e'
     _ -> return ()
 evalS s@(Repeat b e) = evalS (While (Op1 Not e) b) -- keep evaluating block b until expression e is true
+evalS (Return e) = undefined
 evalS Empty = return () -- do nothing
 
 exec :: Block -> Store -> Store

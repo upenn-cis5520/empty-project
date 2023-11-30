@@ -31,6 +31,7 @@ common common-stanza
     , directory
     , random
     , mtl
+    , hashable
   default-language:
     GHC2021
   default-extensions:

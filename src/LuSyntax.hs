@@ -3,12 +3,14 @@ module LuSyntax where
 import Control.Monad (mapM_)
 import qualified Data.Char as Char
 import Data.Map (Map)
+import LuTypes
 import qualified Data.Map as Map
 import Test.HUnit
 import Test.QuickCheck (Arbitrary (..), Gen)
 import qualified Test.QuickCheck as QC
 import Text.PrettyPrint (Doc, (<+>))
 import qualified Text.PrettyPrint as PP
+import Data.Hashable (hash)
 
 newtype Block = Block [Statement] -- s1 ... sn
   deriving (Eq, Show)
@@ -25,6 +27,7 @@ data Statement
   | While Expression Block -- while e do s end
   | Empty -- ';'
   | Repeat Block Expression -- repeat s until e
+  | Return Expression -- return e
   deriving (Eq, Show)
 
 data Expression
@@ -33,6 +36,7 @@ data Expression
   | Op1 Uop Expression -- unary operators
   | Op2 Expression Bop Expression -- binary operators
   | TableConst [TableField] -- table construction, { x = 3 , y = 5 }
+  | Call Var [Expression] -- foo(x, y)
   deriving (Eq, Show)
 
 data Value
@@ -41,8 +45,11 @@ data Value
   | BoolVal Bool -- false, true
   | StringVal String -- "abd"
   | TableVal Name -- <not used in source programs>
-  deriving (Eq, Show, Ord)
+  | FunctionVal [Parameter] LType Block --function (v1: t1): t2
+  deriving (Eq, Show)
 
+type Parameter = (Name, LType) 
+  
 data Uop
   = Neg -- `-` :: Int -> Int
   | Not -- `not` :: a -> Bool
@@ -78,6 +85,19 @@ data TableField
 
 var :: String -> Expression
 var = Var . Name
+
+-- | Helper function to hash value data types. 
+hashV :: Value -> Int 
+hashV NilVal = hash "NilVal"
+hashV (IntVal i) = hash i
+hashV (BoolVal b) = hash b
+hashV (StringVal s) = hash s 
+hashV (TableVal n) = hash $ "table" ++ n 
+hashV (FunctionVal ps rt b) = hash (show ps ++ show rt ++ show b)
+
+-- | Implement custom Ord via hasing since function values make deriving Ord difficult. 
+instance Ord Value where 
+  v1 `compare` v2 = hashV v1 `compare` hashV v2
 
 -- test.lu
 wTest :: Block
@@ -208,6 +228,7 @@ instance PP Value where
   pp NilVal = PP.text "nil"
   pp (StringVal s) = PP.text ("\"" <> s <> "\"")
   pp (TableVal t) = PP.text "<" <> PP.text t <> PP.text ">"
+  pp (FunctionVal ps rt b) = undefined
 
 isBase :: Expression -> Bool
 isBase TableConst {} = True
@@ -241,6 +262,7 @@ instance PP Expression where
       ppPrec _ e' = pp e'
       ppParens b = if b then PP.parens else id
   pp (TableConst fs) = PP.braces (PP.sep (PP.punctuate PP.comma (map pp fs)))
+  pp (Call fv ps) = undefined
 
 instance PP TableField where
   pp (FieldName name e) = pp name <+> PP.equals <+> pp e
@@ -266,6 +288,7 @@ instance PP Statement where
   pp (Repeat b e) =
     PP.hang (PP.text "repeat") 2 (pp b)
       PP.$+$ PP.text "until" <+> pp e
+  pp (Return e) = undefined
 
 level :: Bop -> Int
 level Times = 7
@@ -410,6 +433,7 @@ instance Arbitrary Statement where
     first b
       ++ [Repeat b' e | b' <- shrink b]
       ++ [Repeat b e' | e' <- shrink e]
+  shrink (Return e) = undefined
 
 -- | access the first statement in a block, if one exists
 first :: Block -> [Statement]
@@ -443,6 +467,7 @@ instance Arbitrary Expression where
       ++ [Op2 e1 o e2' | e2' <- shrink e2]
       ++ [e1, e2]
   shrink (TableConst fs) = concatMap getExp fs ++ (TableConst <$> shrink fs)
+  shrink (Call fv ps) = undefined
 
 instance Arbitrary Uop where
   arbitrary = QC.arbitraryBoundedEnum
@@ -468,3 +493,4 @@ instance Arbitrary Value where
   shrink NilVal = []
   shrink (StringVal s) = StringVal <$> shrinkStringLit s
   shrink (TableVal _) = []
+  shrink (FunctionVal _ _ _) = []
