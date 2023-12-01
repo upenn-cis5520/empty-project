@@ -1,8 +1,8 @@
-module DFDB.Types where
+module Types where
 
 -- import ClassyPrelude hiding (Index)
 -- import Control.Lens.TH (makeLenses, makePrisms)
-import Control.Monad (fail)
+
 -- import Data.Aeson
 --   ( FromJSON,
 --     FromJSONKey,
@@ -17,25 +17,28 @@ import Control.Monad (fail)
 --     (.=),
 --   )
 
+import Control.Concurrent.STM
+import Control.Monad (fail)
+import Control.Monad.State
 import Data.Map (Map)
-import Data.Text (Text)
+import RedBlackGADT3
 
 -- import Data.Aeson
 
-newtype TableName = TableName {unTableName :: Text}
+newtype TableName = TableName {unTableName :: String}
 
 data AtomType = AtomTypeInt | AtomTypeString | AtomTypeBool
 
 data Atom where
   AtomInt :: Int -> Atom
-  AtomString :: Text -> Atom
+  AtomString :: String -> Atom
   AtomBool :: Bool -> Atom
 
-type Row = [Atom]
+type Row = TVar [Atom]
 
-newtype ColumnName = ColumnName Text
+newtype ColumnName = ColumnName String
 
-newtype IndexName = IndexName Text
+newtype IndexName = IndexName String
 
 data WhereClause = WhereClause
   { whereClauseColumn :: ColumnName,
@@ -57,15 +60,10 @@ data Statement
 
 newtype PrimaryKey = PrimaryKey {unPrimaryKey :: Int}
 
-data ColumnDefinition = ColumnDefinition
-  { columnDefinitionName :: ColumnName,
-    columnDefinitionType :: AtomType
-  }
-
 data Table = Table
   { tableName :: TableName,
     tableDefinition :: [ColumnDefinition],
-    tableRows :: TreeMap PrimaryKey Row,
+    tableRows :: Map PrimaryKey Row,
     tableNextPrimaryKey :: PrimaryKey,
     tableIndices :: [IndexName]
   }
@@ -74,10 +72,14 @@ data Index = Index
   { indexName :: IndexName,
     indexTable :: TableName,
     indexColumns :: [ColumnName],
-    indexData :: TreeMap [Atom] [Row]
+    indexData :: Map [Atom] [Row]
   }
 
 data Database = Database
   { databaseTables :: Map TableName Table,
     databaseIndices :: Map IndexName Index
   }
+
+newtype Response = Response {res :: String} -- TODO: better response types
+
+type MonadDB = State Database Response

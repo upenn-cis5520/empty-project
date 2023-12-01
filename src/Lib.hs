@@ -1,6 +1,8 @@
 module Lib
-    ( someFunc
-    ) where
+  ( module Execute,
+    module Types,
+  )
+where
 
-someFunc :: String
-someFunc = "Hello CIS 5520"
+import Execute
+import Types
