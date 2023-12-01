@@ -1,5 +1,5 @@
 cradle:
-  stack:
+  cabal:
     - path: ./test
       component: "project-cis5520:test:project-cis5520-test"
     - path: ./src
