@@ -11,3 +11,4 @@ dist-newstyle/cache/source-hashes
 dist-newstyle/cache/up-to-date
 dist-newstyle/tmp/environment.-24280/.ghc.environment.x86_64-mingw32-9.4.5
 hie.yaml
+*.yaml

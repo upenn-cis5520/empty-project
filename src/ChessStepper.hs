@@ -30,6 +30,10 @@ playMove = undefined
 playMoves :: [Move] -> S.State Game ()
 playMoves = undefined
 
+-- Get current game
+getGame :: S.State Game Game
+getGame = undefined
+
 -- Initialise the game
 createGame :: Game
 createGame = undefined
@@ -49,7 +53,8 @@ instance Arbitrary Move where
 
 -- Check if the game board changes after a move
 prop_validMove :: Game -> Move -> Property
-prop_validMove = undefined
+prop_validMove game move = runState (validMove move) game ==> 
+  runState (playMove move) game /= game
 
 -------------
 -- Stepper --
