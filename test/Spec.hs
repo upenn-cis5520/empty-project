@@ -13,10 +13,10 @@ prop_CreateInsertSelect s =
   s
     == evalState
       ( do
-          execStatement $ StatementCreate "table" [ColumnDefinition (ColumnName "column") String]
-          execStatement $ StatementInsert (createRow s) (TableName "table")
-          return $ execStatement $ StatementSelect [ColumnName "column"] (TableName "table") []
+          db <- execStatement $ emptyDB (StatementCreate "table" [ColumnDefinition (ColumnName "column") CellTypeString])
+          db' <- execStatement $ db (StatementInsert (createRow s) (TableName "table"))
+          return $ execStatement $ db' (StatementSelect [ColumnName "column"] (TableName "table") [])
       )
 
 createRow :: String -> Row
-createRow s = [newTVar s]
+createRow s = newTVar [CellString s]

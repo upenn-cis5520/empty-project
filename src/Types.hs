@@ -27,14 +27,14 @@ import RedBlackGADT3
 
 newtype TableName = TableName {unTableName :: String}
 
-data AtomType = AtomTypeInt | AtomTypeString | AtomTypeBool
+data CellType = CellTypeInt | CellTypeString | CellTypeBool
 
-data Atom where
-  AtomInt :: Int -> Atom
-  AtomString :: String -> Atom
-  AtomBool :: Bool -> Atom
+data Cell where
+  CellInt :: Int -> Cell
+  CellString :: String -> Cell
+  CellBool :: Bool -> Cell
 
-type Row = TVar [Atom]
+type Row = STM (TVar [Cell])
 
 newtype ColumnName = ColumnName String
 
@@ -42,12 +42,12 @@ newtype IndexName = IndexName String
 
 data WhereClause = WhereClause
   { whereClauseColumn :: ColumnName,
-    whereClauseValue :: Atom
+    whereClauseValue :: Cell
   }
 
 data ColumnDefinition = ColumnDefinition
   { columnDefinitionName :: ColumnName,
-    columnDefinitionType :: AtomType
+    columnDefinitionType :: CellType
   }
 
 data Statement
@@ -72,7 +72,7 @@ data Index = Index
   { indexName :: IndexName,
     indexTable :: TableName,
     indexColumns :: [ColumnName],
-    indexData :: Map [Atom] [Row]
+    indexData :: Map [Cell] [Row]
   }
 
 data Database = Database
