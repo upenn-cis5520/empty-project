@@ -1,9 +1,10 @@
 module Execute where
 
+import Control.Concurrent.STM
 import Types
 
-emptyDB :: MonadDB
+emptyDB :: DBRef
 emptyDB = undefined
 
-execStatement :: MonadDB -> Statement -> MonadDB
+execStatement :: DBRef -> Statement -> DBRef -> STM Response
 execStatement = undefined

@@ -11,12 +11,11 @@ main = do
 prop_CreateInsertSelect :: String -> Bool
 prop_CreateInsertSelect s =
   s
-    == evalState
-      ( do
-          db <- execStatement $ emptyDB (StatementCreate "table" [ColumnDefinition (ColumnName "column") CellTypeString])
-          db' <- execStatement $ db (StatementInsert (createRow s) (TableName "table"))
-          return $ execStatement $ db' (StatementSelect [ColumnName "column"] (TableName "table") [])
-      )
+    == ( do
+           execStatement $ emptyDB (StatementCreate "table" [ColumnDefinition (ColumnName "column") CellTypeString])
+           execStatement $ db (StatementInsert (createRow s) (TableName "table"))
+           return $ execStatement $ db' (StatementSelect [ColumnName "column"] (TableName "table") [])
+       )
 
 createRow :: String -> Row
 createRow s = newTVar [CellString s]

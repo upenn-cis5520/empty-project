@@ -21,7 +21,6 @@ import Control.Concurrent.STM
 import Control.Monad (fail)
 import Control.Monad.State
 import Data.Map (Map)
-import RedBlackGADT3
 
 -- import Data.Aeson
 
@@ -34,7 +33,7 @@ data Cell where
   CellString :: String -> Cell
   CellBool :: Bool -> Cell
 
-type Row = STM (TVar [Cell])
+newtype Row = TVar [Cell]
 
 newtype ColumnName = ColumnName String
 
@@ -58,6 +57,8 @@ data Statement
   | StatementDrop TableName
   | StatementDropIndex IndexName
 
+newtype Transaction = Atomic [Statement]
+
 newtype PrimaryKey = PrimaryKey {unPrimaryKey :: Int}
 
 data Table = Table
@@ -76,10 +77,10 @@ data Index = Index
   }
 
 data Database = Database
-  { databaseTables :: Map TableName Table,
-    databaseIndices :: Map IndexName Index
+  { databaseTables :: Map TableName (TVar Table),
+    databaseIndices :: Map IndexName (TVar Index)
   }
 
 newtype Response = Response {res :: String} -- TODO: better response types
 
-type MonadDB = State Database Response
+type DBRef = TVar Database
