@@ -1,64 +1,53 @@
-module ChessStepper (playMove, playMoves) where
+module ChessStepper where
 
+import ChessGame
 import ChessParser
 import ChessSyntax
-import Control.Monad.State qualified as S
-import Test.HUnit
-import Test.QuickCheck
+import Data.Map qualified as Map
 
--- Given a player, check if they are in check
-isCheck :: Move -> S.State Game Bool
-isCheck = undefined
-
--- Given a move, check if it results in checkmate
-isCheckmate :: Move -> S.State Game Bool
-isCheckmate = undefined
-
--- Given a move, check if it is valid
-validMove :: Move -> S.State Game Bool
-validMove = undefined
-
--- Given a game, switch the current player
-switchPlayer :: S.State Game ()
-switchPlayer = undefined
-
--- Given a move, update the new game state
-playMove :: Move -> S.State Game ()
-playMove = undefined
-
--- Given a list of moves, play them all
-playMoves :: [Move] -> S.State Game ()
-playMoves = undefined
-
--- Get current game
-getGame :: S.State Game Game
-getGame = undefined
-
--- Initialise the game
-createGame :: Game
-createGame = undefined
-
--- Print the current Game
-printGame :: S.State Game ()
-printGame = undefined
-
--------------------------
--- Arbitrary definitions--
--------------------------
-instance Arbitrary Game where
-  arbitrary = undefined
-
-instance Arbitrary Move where
-  arbitrary = undefined
-
--- Check if the game board changes after a move
-prop_validMove :: Game -> Move -> Property
-prop_validMove game move = runState (validMove move) game ==> 
-  runState (playMove move) game /= game
 
 -------------
 -- Stepper --
 -------------
+
+-- Initialise the game
+initialList :: [(Square, CPiece)]
+initialList =
+  [ (Square 'a' 1, CPiece White Rook),
+    (Square 'b' 1, CPiece White Knight),
+    (Square 'c' 1, CPiece White Bishop),
+    (Square 'd' 1, CPiece White Queen),
+    (Square 'e' 1, CPiece White King),
+    (Square 'f' 1, CPiece White Bishop),
+    (Square 'g' 1, CPiece White Knight),
+    (Square 'h' 1, CPiece White Rook),
+    (Square 'a' 2, CPiece White Pawn),
+    (Square 'b' 2, CPiece White Pawn),
+    (Square 'c' 2, CPiece White Pawn),
+    (Square 'd' 2, CPiece White Pawn),
+    (Square 'e' 2, CPiece White Pawn),
+    (Square 'f' 2, CPiece White Pawn),
+    (Square 'g' 2, CPiece White Pawn),
+    (Square 'h' 2, CPiece White Pawn),
+    (Square 'a' 7, CPiece Black Pawn),
+    (Square 'b' 7, CPiece Black Pawn),
+    (Square 'c' 7, CPiece Black Pawn),
+    (Square 'd' 7, CPiece Black Pawn),
+    (Square 'e' 7, CPiece Black Pawn),
+    (Square 'f' 7, CPiece Black Pawn),
+    (Square 'g' 7, CPiece Black Pawn),
+    (Square 'h' 7, CPiece Black Pawn),
+    (Square 'a' 8, CPiece Black Rook),
+    (Square 'b' 8, CPiece Black Knight),
+    (Square 'c' 8, CPiece Black Bishop),
+    (Square 'd' 8, CPiece Black Queen),
+    (Square 'e' 8, CPiece Black King),
+    (Square 'f' 8, CPiece Black Bishop),
+    (Square 'g' 8, CPiece Black Knight),
+    (Square 'h' 8, CPiece Black Rook)
+  ]
+createGame :: Game
+createGame = Game (Map.fromList initialList) White
 
 data Stepper = Stepper
   { game :: Game,
