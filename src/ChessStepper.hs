@@ -64,20 +64,8 @@ movesStepper s (Left err) = do
 movesStepper s (Right m) = do
   let (result, newGame) = S.runState (playMoves m) (game s)
    in case result of
-        InvalidPiece -> do
-          putStrLn "Invalid piece"
-          go s
-        InvalidDestination -> do
-          putStrLn "Invalid destination"
-          go s
-        InvalidCapture -> do
-          putStrLn "Invalid capture"
-          go s
-        InvalidCheck -> do
-          putStrLn "Invalid check"
-          go s
-        InvalidMate -> do
-          putStrLn "Invalid checkmate"
+        InvalidMove -> do
+          putStrLn "Invalid move"
           go s
         Draw -> do
           putStrLn "Draw"
