@@ -23,11 +23,11 @@ switchPlayer :: S.State Game ()
 switchPlayer = undefined
 
 -- Given a move, update the new game state
-playMove :: Move -> S.State Game ()
+playMove :: Move -> S.State Game MoveResult
 playMove = undefined
 
 -- Given a list of moves, play them all
-playMoves :: [Move] -> S.State Game ()
+playMoves :: [Move] -> S.State Game MoveResult
 playMoves = undefined
 
 -- Print a Game's current state
@@ -56,9 +56,7 @@ printRow' i c b =
     else val ++ " " ++ printRow' i (chr (ord c + 1)) b
   where
     val :: String
-    val = case Map.lookup (Square c i) b of
-      Just x -> show x
-      Nothing -> "x"
+    val = maybe "x" show (Map.lookup (Square c i) b)
 
 firstRow :: String
 firstRow = "   a b c d e f g h   "

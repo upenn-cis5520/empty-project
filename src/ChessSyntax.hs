@@ -1,8 +1,8 @@
 module ChessSyntax where
 
+import Data.Char (toLower)
 import Data.Map (Map, (!?))
 import Data.Map qualified as Map
-import Data.Char (toLower)
 
 -- Using https://en.wikipedia.org/wiki/Algebraic_notation_(chess)
 -- Details the moves from Parser
@@ -11,7 +11,7 @@ data Piece = Pawn | Knight | Bishop | Rook | Queen | King deriving (Eq)
 
 data Color = White | Black deriving (Eq, Show)
 
-data CPiece =  CPiece Color Piece deriving (Eq)
+data CPiece = CPiece Color Piece deriving (Eq)
 
 type File = Char
 
@@ -30,6 +30,8 @@ newtype Mate = Mate Bool deriving (Eq, Show)
 type Board = Map Square CPiece
 
 data Game = Game Board Color deriving (Eq, Show)
+
+data MoveResult = Success | InvalidPiece | InvalidDestination | InvalidCapture | InvalidCheck | InvalidMate deriving (Eq, Show)
 
 -- the square is the destination
 data Move
