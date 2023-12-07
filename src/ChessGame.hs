@@ -47,7 +47,6 @@ knightKills b c (Square rank file) =
     || checkPiece (translateColor c Knight) (rank - 1) (chr (ord file + 2)) b
     || checkPiece (translateColor c Knight) (rank - 1) (chr (ord file - 2)) b
 
--- TODO: Check if moving any of these leads to checkmate
 -- check if a bishop of a color can attack at this location
 bishopKills :: Board -> Color -> Square -> Bool
 bishopKills b c (Square rank file) =
