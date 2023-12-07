@@ -1,4 +1,4 @@
-module ChessGame (playMove, playMoves, printGame) where
+module ChessGame (playMove, playMoves, printGame, initialGame) where
 
 import ChessParser
 import ChessSyntax
@@ -30,11 +30,9 @@ playMove = undefined
 playMoves :: [Move] -> S.State Game MoveResult
 playMoves = undefined
 
--- Print a Game's current state
-printGame :: S.State Game String
-printGame = do
-  (Game b col) <- S.get
-  return $ firstRow ++ "\n" ++ secondRow ++ "\n" ++ printRow 8 b ++ "\nIt is currently " ++ show col ++ "'s turn.\n"
+-- Print a Game's state
+printGame :: Game -> String
+printGame (Game b col) = firstRow ++ "\n" ++ secondRow ++ "\n" ++ printRow 8 b ++ "\nIt is currently " ++ show col ++ "'s turn.\n"
 
 printRow :: Int -> Board -> String
 printRow r b =
@@ -56,10 +54,50 @@ printRow' i c b =
     else val ++ " " ++ printRow' i (chr (ord c + 1)) b
   where
     val :: String
-    val = maybe "x" show (Map.lookup (Square c i) b)
+    val = maybe "." show (Map.lookup (Square c i) b)
 
+-- Initialise the game
 firstRow :: String
 firstRow = "   a b c d e f g h   "
 
 secondRow :: String
 secondRow = "  +---------------+  "
+
+initialList :: [(Square, CPiece)]
+initialList =
+  [ (Square 'a' 1, CPiece White Rook),
+    (Square 'b' 1, CPiece White Knight),
+    (Square 'c' 1, CPiece White Bishop),
+    (Square 'd' 1, CPiece White Queen),
+    (Square 'e' 1, CPiece White King),
+    (Square 'f' 1, CPiece White Bishop),
+    (Square 'g' 1, CPiece White Knight),
+    (Square 'h' 1, CPiece White Rook),
+    (Square 'a' 2, CPiece White Pawn),
+    (Square 'b' 2, CPiece White Pawn),
+    (Square 'c' 2, CPiece White Pawn),
+    (Square 'd' 2, CPiece White Pawn),
+    (Square 'e' 2, CPiece White Pawn),
+    (Square 'f' 2, CPiece White Pawn),
+    (Square 'g' 2, CPiece White Pawn),
+    (Square 'h' 2, CPiece White Pawn),
+    (Square 'a' 7, CPiece Black Pawn),
+    (Square 'b' 7, CPiece Black Pawn),
+    (Square 'c' 7, CPiece Black Pawn),
+    (Square 'd' 7, CPiece Black Pawn),
+    (Square 'e' 7, CPiece Black Pawn),
+    (Square 'f' 7, CPiece Black Pawn),
+    (Square 'g' 7, CPiece Black Pawn),
+    (Square 'h' 7, CPiece Black Pawn),
+    (Square 'a' 8, CPiece Black Rook),
+    (Square 'b' 8, CPiece Black Knight),
+    (Square 'c' 8, CPiece Black Bishop),
+    (Square 'd' 8, CPiece Black Queen),
+    (Square 'e' 8, CPiece Black King),
+    (Square 'f' 8, CPiece Black Bishop),
+    (Square 'g' 8, CPiece Black Knight),
+    (Square 'h' 8, CPiece Black Rook)
+  ]
+
+initialGame :: Game
+initialGame = Game (Map.fromList initialList) White

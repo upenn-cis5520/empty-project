@@ -3,66 +3,87 @@ module ChessStepper where
 import ChessGame
 import ChessParser
 import ChessSyntax
-import Data.Map qualified as Map
-
+import Control.Monad.State qualified as S
+import Data.List as List
 
 -------------
 -- Stepper --
 -------------
 
--- Initialise the game
-initialList :: [(Square, CPiece)]
-initialList =
-  [ (Square 'a' 1, CPiece White Rook),
-    (Square 'b' 1, CPiece White Knight),
-    (Square 'c' 1, CPiece White Bishop),
-    (Square 'd' 1, CPiece White Queen),
-    (Square 'e' 1, CPiece White King),
-    (Square 'f' 1, CPiece White Bishop),
-    (Square 'g' 1, CPiece White Knight),
-    (Square 'h' 1, CPiece White Rook),
-    (Square 'a' 2, CPiece White Pawn),
-    (Square 'b' 2, CPiece White Pawn),
-    (Square 'c' 2, CPiece White Pawn),
-    (Square 'd' 2, CPiece White Pawn),
-    (Square 'e' 2, CPiece White Pawn),
-    (Square 'f' 2, CPiece White Pawn),
-    (Square 'g' 2, CPiece White Pawn),
-    (Square 'h' 2, CPiece White Pawn),
-    (Square 'a' 7, CPiece Black Pawn),
-    (Square 'b' 7, CPiece Black Pawn),
-    (Square 'c' 7, CPiece Black Pawn),
-    (Square 'd' 7, CPiece Black Pawn),
-    (Square 'e' 7, CPiece Black Pawn),
-    (Square 'f' 7, CPiece Black Pawn),
-    (Square 'g' 7, CPiece Black Pawn),
-    (Square 'h' 7, CPiece Black Pawn),
-    (Square 'a' 8, CPiece Black Rook),
-    (Square 'b' 8, CPiece Black Knight),
-    (Square 'c' 8, CPiece Black Bishop),
-    (Square 'd' 8, CPiece Black Queen),
-    (Square 'e' 8, CPiece Black King),
-    (Square 'f' 8, CPiece Black Bishop),
-    (Square 'g' 8, CPiece Black Knight),
-    (Square 'h' 8, CPiece Black Rook)
-  ]
-createGame :: Game
-createGame = Game (Map.fromList initialList) White
-
 data Stepper = Stepper
   { game :: Game,
-    move :: Maybe Move,
     history :: Maybe Stepper
   }
 
 initialStepper :: Stepper
 initialStepper =
   Stepper
-    { game = createGame,
-      move = Nothing,
+    { game = initialGame,
       history = Nothing
     }
 
 -- take moves, and print the current setup at each turn
 stepper :: IO ()
-stepper = undefined
+stepper = do
+  putStrLn "Welcome to Chess Parser! Enter :u to undo, :q to quit, :f to load a file, and :r to restart"
+  go initialStepper
+
+go :: Stepper -> IO ()
+go s = do
+  putStrLn "Enter a move:"
+  input <- getLine
+  case List.uncons (words input) of
+    Just (":f", [fn]) -> do
+      f <- readFile fn
+      m <- parseFile f
+      movesStepper s m
+    Just (":q", _) -> do
+      putStrLn "Goodbye!"
+    Just (":u", _) -> do
+      putStrLn "Undoing..."
+      case history s of
+        Nothing -> do
+          putStrLn "No history to undo"
+          go s
+        Just h -> do
+          putStrLn (printGame (game h))
+          go h
+    Just (":r", _) -> do
+      putStrLn "Restarting..."
+      go initialStepper
+    Just _ -> do
+      movesStepper s (parseMoves input)
+    Nothing -> do
+      putStrLn "Please enter an input"
+      go s
+
+movesStepper :: Stepper -> Either a [Move] -> IO ()
+movesStepper s (Left err) = do
+  putStrLn "Invalid move format"
+  go s
+movesStepper s (Right m) = do
+  let (result, newGame) = S.runState (playMoves m) (game s)
+   in case result of
+        InvalidPiece -> do
+          putStrLn "Invalid piece"
+          go s
+        InvalidDestination -> do
+          putStrLn "Invalid destination"
+          go s
+        InvalidCapture -> do
+          putStrLn "Invalid capture"
+          go s
+        InvalidCheck -> do
+          putStrLn "Invalid check"
+          go s
+        InvalidMate -> do
+          putStrLn "Invalid checkmate"
+          go s
+        Draw -> do
+          putStrLn "Draw"
+        Won c -> do
+          putStrLn (show c ++ " won!")
+        ContinueGame -> do
+          let newStepper = Stepper {game = newGame, history = Just s}
+          putStrLn (printGame newGame)
+          go newStepper
