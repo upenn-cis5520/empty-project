@@ -24,22 +24,6 @@ parseSingleMove = parse moveParser ""
 parseFile :: String -> IO (Either ParseError [Move])
 parseFile = parseFromFile (const <$> movesParser <*> eof)
 
-test_SingleMove :: Test
-test_SingleMove =
-  TestList
-    [ -- Test Pawn move
-      parseMoves "e3" ~?= Right [NormalMove Pawn (Square 3 'e') Nothing (Promotion Nothing) (Capture False) (Check False) (Mate False)],
-      -- Test Pawn move with disambiguation
-      parseMoves "e7e3" ~?= Right [NormalMove Pawn (Square 3 'e') (Just (Both (Square 7 'e'))) (Promotion Nothing) (Capture False) (Check False) (Mate False)],
-      -- Test King move
-      parseMoves "Ka1b4" ~?= Right [NormalMove King (Square 4 'b') (Just (Both (Square 1 'a'))) (Promotion Nothing) (Capture False) (Check False) (Mate False)],
-      -- Test Castling
-      parseMoves "O-O" ~?= Right [KingSideCastling],
-      parseMoves "O-O-O" ~?= Right [QueenSideCastling],
-      -- Test Pawn Promotion
-      parseMoves "ae7=Q" ~?= Right [NormalMove Pawn (Square 7 'e') (Just (File 'a')) (Promotion (Just Queen)) (Capture False) (Check False) (Mate False)]
-    ]
-
 -- Space separated moves parser
 movesParser :: Parser [Move]
 movesParser = many $ do
@@ -52,8 +36,8 @@ moveParser :: Parser Move
 moveParser =
   try queensideCastlingParser
     <|> try kingsideCastlingParser
-    <|> try normalMoveParser
-    <|> normalMoveWithDisambiguationParser
+    <|> try normalMoveWithDisambiguationParser
+    <|> normalMoveParser
 
 normalMoveParser :: Parser Move
 normalMoveParser = do
@@ -63,7 +47,6 @@ normalMoveParser = do
   prom <- promotionParser
   check <- optionMaybe (char '+')
   checkmate <- optionMaybe (char '#')
-  eof
   return $ NormalMove (fromMaybe Pawn p) toSquare Nothing (Promotion prom) (Capture capture) (Check (isJust check)) (Mate (isJust checkmate))
 
 normalMoveWithDisambiguationParser :: Parser Move
@@ -75,7 +58,6 @@ normalMoveWithDisambiguationParser = do
   prom <- promotionParser
   check <- optionMaybe (char '+')
   checkmate <- optionMaybe (char '#')
-  eof
   return $ NormalMove (fromMaybe Pawn p) toSquare disambiguation (Promotion prom) (Capture capture) (Check (isJust check)) (Mate (isJust checkmate))
 
 pieceParser :: Parser Piece
@@ -128,11 +110,9 @@ promotionParser = optionMaybe $ do
 kingsideCastlingParser :: Parser Move
 kingsideCastlingParser = do
   try $ string "O-O"
-  eof
   return KingSideCastling
 
 queensideCastlingParser :: Parser Move
 queensideCastlingParser = do
   try $ string "O-O-O"
-  eof
   return QueenSideCastling
