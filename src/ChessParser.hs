@@ -1,6 +1,7 @@
 module ChessParser
   ( parseMoves,
     parseSingleMove,
+    parseFile,
   )
 where
 
@@ -9,7 +10,7 @@ import Control.Applicative (Alternative (many, (<|>)))
 import Data.Maybe (fromMaybe, isJust)
 import Test.HUnit (Test (TestCase, TestList), runTestTT, (~:), (~?=))
 import Text.Parsec (ParseError, char, digit, eof, oneOf, option, optionMaybe, parse, spaces, string, try)
-import Text.Parsec.String (Parser)
+import Text.Parsec.String (Parser, parseFromFile)
 
 -- Given pace separated moves, return a list of Moves
 parseMoves :: String -> Either ParseError [Move]
@@ -18,6 +19,10 @@ parseMoves = parse movesParser ""
 -- Function that actaully parse a single chess move
 parseSingleMove :: String -> Either ParseError Move
 parseSingleMove = parse moveParser ""
+
+-- TODO: check that this works
+parseFile :: String -> IO (Either ParseError [Move])
+parseFile = parseFromFile (const <$> movesParser <*> eof)
 
 test_SingleMove :: Test
 test_SingleMove =
