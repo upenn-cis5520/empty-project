@@ -17,7 +17,7 @@ type File = Char
 
 type Rank = Int
 
-data Square = Square File Rank deriving (Eq, Show)
+data Square = Square Rank File deriving (Eq, Show)
 
 newtype Promotion = Promotion (Maybe Piece) deriving (Eq, Show)
 

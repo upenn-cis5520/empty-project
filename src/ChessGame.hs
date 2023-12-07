@@ -4,14 +4,38 @@ import ChessParser
 import ChessSyntax
 import Control.Monad.State qualified as S
 import Data.Char (chr, ord)
+import Data.Foldable (find)
+import Data.Map ((!?))
 import Data.Map qualified as Map
+import Data.Maybe (isJust)
 
--- Given a player, check if they are in check
-isCheck :: Move -> S.State Game Bool
-isCheck = undefined
+-- Find the box that a piece is in
+findPiece :: CPiece -> Board -> Maybe Square
+findPiece p = Map.foldrWithKey (\k v acc -> if v == p then Just k else acc) Nothing
+
+-- Check that both kinds exist
+validBoard :: Board -> Bool
+validBoard b = isJust (findPiece (CPiece White King) b) && isJust (findPiece (CPiece Black King) b)
+
+-- Given a game, check if the current player is in check
+isCheck :: Game -> Bool
+isCheck (Game b c) = case findPiece (CPiece c King) b of
+  Nothing -> True
+  Just (Square rank file) -> isCheck' k b c
+
+-- check if a pawn of a color can attack at this location
+pawnKills :: Board -> Color -> Square -> Bool
+pawnKills b c (Square rank file) =
+  (isJust b !? Square (chr (ord rank - 1) (file - (translateMove c))))
+    || (isJust (b !? Square (chr (ord rank + 1)) (file + (translateMove c))))
+
+-- translate the move for a color
+translateMove :: Color -> Int
+translateMove White = 1
+translateMove Black = -1
 
 -- Given a move, check if it results in checkmate
-isCheckmate :: Move -> S.State Game Bool
+isCheckmate :: Game -> Bool
 isCheckmate = undefined
 
 -- Given a move, check if it is valid
@@ -19,8 +43,9 @@ validMove :: Move -> S.State Game Bool
 validMove = undefined
 
 -- Given a game, switch the current player
-switchPlayer :: S.State Game ()
-switchPlayer = undefined
+switchPlayer :: Game -> Game
+switchPlayer (Game b White) = Game b Black
+switchPlayer (Game b Black) = Game b White
 
 -- Given a move, update the new game state
 playMove :: Move -> S.State Game MoveResult
@@ -28,7 +53,14 @@ playMove = undefined
 
 -- Given a list of moves, play them all
 playMoves :: [Move] -> S.State Game MoveResult
-playMoves = undefined
+playMoves [] = do
+  g <- S.get
+  return ContinueGame
+playMoves (m : ms) = do
+  r <- playMove m
+  case r of
+    ContinueGame -> playMoves ms
+    _ -> return r
 
 -- Print a Game's state
 printGame :: Game -> String
