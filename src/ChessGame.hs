@@ -216,11 +216,12 @@ validMove
       (Mate checkm)
     )
   g@(Game b c) =
-    let origin@(Square ro fo) = resolveDisambiguation disam g
+    let origin@(Square ro fo) = fromMaybe (Square 9 'i') (resolveDisambiguation disam dest p g capture)
         newPiece = fromMaybe p prom
         newBoard = boardAfterMove (CPiece c newPiece) origin dest b
         newGame = Game newBoard (otherColor c)
-     in checkPiece (CPiece c p) rd fd b
+     in checkPiece (CPiece c p) ro fo b
+          && origin /= dest
           && emptyOrOpponent g dest
           && check == isCheck newGame
           && not (isCheck (Game newBoard c)) -- your king shouldn't be in check after the move
@@ -297,9 +298,58 @@ pred2 = pred . pred
 succ2 :: (Enum a) => a -> a
 succ2 = succ . succ
 
--- TODO: Resolve disambiguation
-resolveDisambiguation :: Maybe Disambiguation -> Game -> Square
-resolveDisambiguation (Just (Both s)) _ = s undefined
+-- Resolve disambiguation
+resolveDisambiguation :: Maybe Disambiguation -> Square -> Piece -> Game -> Bool -> Maybe Square
+resolveDisambiguation (Just (Both s)) _ _ _ _ = Just s
+resolveDisambiguation (Just (File f)) dest p g c = findValidOrigin (fileDisambiguous f p g) dest p g c
+resolveDisambiguation (Just (Rank r)) dest p g c = findValidOrigin (rankDisambiguous r p g) dest p g c
+resolveDisambiguation Nothing dest p g c = findValidOrigin (findAllPieces p g) dest p g c
+
+-- Check a rank for multiple valid pieces
+rankDisambiguous :: Rank -> Piece -> Game -> [Square]
+rankDisambiguous r p (Game b c) =
+  Map.foldrWithKey
+    ( \k@(Square r' _) v acc ->
+        if r' == r && v == CPiece c p then k : acc else acc
+    )
+    []
+    b
+
+-- Check a file for multiple valid pieces
+fileDisambiguous :: File -> Piece -> Game -> [Square]
+fileDisambiguous f p (Game b c) =
+  Map.foldrWithKey
+    ( \k@(Square _ f') v acc ->
+        if f' == f && v == CPiece c p then k : acc else acc
+    )
+    []
+    b
+
+-- Given a piece, find all the squares it is on
+findAllPieces :: Piece -> Game -> [Square]
+findAllPieces p (Game b c) =
+  Map.foldrWithKey
+    ( \k v acc -> if v == CPiece c p then k : acc else acc
+    )
+    []
+    b
+
+-- Given a list of origins, check which works
+findValidOrigin :: [Square] -> Square -> Piece -> Game -> Bool -> Maybe Square
+findValidOrigin [] _ _ _ _ = Nothing
+findValidOrigin (o : os) dest p g@(Game b c) capture =
+  if helper o
+    then Just o
+    else findValidOrigin os dest p g capture
+  where
+    helper :: Square -> Bool
+    helper o' = case p of
+      Pawn -> validPawnMove g o' dest capture
+      Knight -> validKnightMove o' dest
+      Bishop -> validBishopMove b o' dest
+      Rook -> validRookMove b o' dest
+      Queen -> validBishopMove b o' dest || validRookMove b o' dest
+      King -> validKingMove o' dest
 
 -- Given a game, switch the current player
 switchPlayer :: Game -> Game
@@ -341,8 +391,8 @@ updateBoard QueenSideCastling (Game b c) =
             (CPiece c Rook)
             (Map.delete (Square r 'e') (Map.delete (Square r 'a') b))
         )
-updateBoard (NormalMove p dest disam _ _ _ _) g@(Game b c) =
-  let origin = resolveDisambiguation disam g
+updateBoard (NormalMove p dest disam _ (Capture cap) _ _) g@(Game b c) =
+  let origin = fromMaybe (Square 0 'a') (resolveDisambiguation disam dest p g cap)
    in boardAfterMove (CPiece c p) origin dest b
 
 -- Given a list of moves, play them all
