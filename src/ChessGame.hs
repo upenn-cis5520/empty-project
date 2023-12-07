@@ -138,7 +138,7 @@ isCheckmate :: Game -> Bool
 isCheckmate (Game b c) = case findPiece (CPiece c King) b of
   Nothing -> True
   Just s@(Square rank file) ->
-    isCheck (Game b c)
+    isCheck (Game (helper id id) c)
       && isCheck (Game (helper succ id) c)
       && isCheck (Game (helper pred id) c)
       && isCheck (Game (helper succ succ) c)
@@ -150,10 +150,13 @@ isCheckmate (Game b c) = case findPiece (CPiece c King) b of
     where
       helper :: (Int -> Int) -> (Char -> Char) -> Board
       helper rankOp fileOp =
-        Map.insert
-          (Square (rankOp rank) (fileOp file))
-          (CPiece c King)
-          (Map.delete s b)
+        if rankOp rank < 1 || rankOp rank > 8 || fileOp file < 'a' || fileOp file > 'h'
+          then Map.empty
+          else
+            Map.insert
+              (Square (rankOp rank) (fileOp file))
+              (CPiece c King)
+              (Map.delete s b)
 
 -- Given a move, check if it is valid
 validMove :: Move -> S.State Game Bool
