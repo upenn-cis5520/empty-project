@@ -3,8 +3,6 @@ module ChessGame (playMove, playMoves, printGame, initialGame) where
 import ChessParser
 import ChessSyntax
 import Control.Monad.State qualified as S
-import Data.Char (chr, ord)
-import Data.Foldable (find)
 import Data.Map ((!?))
 import Data.Map qualified as Map
 import Data.Maybe (fromMaybe, isJust, isNothing)
