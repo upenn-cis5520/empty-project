@@ -24,30 +24,33 @@ import Data.Map (Map)
 
 -- import Data.Aeson
 
-newtype TableName = TableName {unTableName :: String}
+newtype TableName = TableName {unTableName :: String} deriving (Eq, Show)
 
-data CellType = CellTypeInt | CellTypeString | CellTypeBool
+data CellType = CellTypeInt | CellTypeString | CellTypeBool deriving (Eq, Show)
 
 data Cell where
   CellInt :: Int -> Cell
   CellString :: String -> Cell
   CellBool :: Bool -> Cell
+  deriving (Eq, Show)
 
-newtype Row = TVar [Cell]
+newtype Row = TVar [Cell] deriving (Eq, Show)
 
-newtype ColumnName = ColumnName String
+newtype ColumnName = ColumnName String deriving (Eq, Show)
 
-newtype IndexName = IndexName String
+newtype IndexName = IndexName String deriving (Eq, Show)
 
 data WhereClause = WhereClause
   { whereClauseColumn :: ColumnName,
     whereClauseValue :: Cell
   }
+  deriving (Eq, Show)
 
 data ColumnDefinition = ColumnDefinition
   { columnDefinitionName :: ColumnName,
     columnDefinitionType :: CellType
   }
+  deriving (Eq, Show)
 
 data Statement
   = StatementSelect [ColumnName] TableName [WhereClause]
@@ -56,10 +59,11 @@ data Statement
   | StatementCreateIndex IndexName TableName [ColumnName]
   | StatementDrop TableName
   | StatementDropIndex IndexName
+  deriving (Eq, Show)
 
-newtype Transaction = Atomic [Statement]
+newtype Transaction = Atomic [Statement] deriving (Eq, Show)
 
-newtype PrimaryKey = PrimaryKey {unPrimaryKey :: Int}
+newtype PrimaryKey = PrimaryKey {unPrimaryKey :: Int} deriving (Eq, Show)
 
 data Table = Table
   { tableName :: TableName,
@@ -68,6 +72,7 @@ data Table = Table
     tableNextPrimaryKey :: PrimaryKey,
     tableIndices :: [IndexName]
   }
+  deriving (Eq, Show)
 
 data Index = Index
   { indexName :: IndexName,
@@ -75,12 +80,14 @@ data Index = Index
     indexColumns :: [ColumnName],
     indexData :: Map [Cell] [Row]
   }
+  deriving (Eq, Show)
 
 data Database = Database
   { databaseTables :: Map TableName (TVar Table),
     databaseIndices :: Map IndexName (TVar Index)
   }
+  deriving (Eq)
 
-newtype Response = Response {res :: String} -- TODO: better response types
+newtype Response = Response {res :: String} deriving (Eq, Show)
 
 type DBRef = TVar Database
