@@ -125,16 +125,29 @@ createIndexParser = StatementCreateIndex <$> (P.string "CREATE INDEX" *> P.space
   where
     indexName = IndexName <$> identifier
 
+parsedAlterAction :: Parser AlterAction
+parsedAlterAction = P.choice [addColumn, dropColumn, renameColumn, modifyColumn]
+  where
+    addColumn = AddColumn <$> (P.string "ADD COLUMN" *> P.space *> columnDefinition)
+    dropColumn = DropColumn <$> (P.string "DROP COLUMN" *> P.space *> columnName)
+    renameColumn = RenameColumn <$> (P.string "RENAME COLUMN" *> P.space *> columnName) <*> (P.space *> P.string "TO" *> P.space *> columnName)
+    modifyColumn = ModifyColumn <$> (P.string "MODIFY COLUMN" *> P.space *> columnName) <*> (P.space *> P.string "TO" *> P.space *> P.char '(' *> columnDefinition <* P.char ')')
+    columnDefinition = ColumnDefinition <$> columnName <*> (P.space *> cellType)
+    cellType = CellTypeInt <$ P.string "INT" <|> CellTypeString <$ P.string "STRING" <|> CellTypeBool <$ P.string "BOOL"
+
+alterParser :: Parser Statement
+alterParser = StatementAlter <$> (P.string "ALTER TABLE" *> P.space *> parsedTableName) <*> (P.space *> parsedAlterAction <* P.eof)
+
 -- Combine all statement parsers
 statementParser :: Parser Statement
-statementParser = P.choice [selectParser, insertParser, dropParser, dropIndexParser, createParser, createIndexParser]
+statementParser = P.choice [selectParser, insertParser, alterParser, dropParser, dropIndexParser, createParser, createIndexParser]
 
 -- Example of how to use the parser
 parseSQL :: String -> Either P.ParseError Statement
 parseSQL = P.parse statementParser
 
 testParseSQL :: Test
-testParseSQL = TestList [test_selectQuery, test_insertQuery, test_dropQuery, test_dropIndexQuery, test_createTableQuery, test_createIndexQuery]
+testParseSQL = TestList [test_selectQuery, test_insertQuery, test_alterQuery, test_dropQuery, test_dropIndexQuery, test_createTableQuery, test_createIndexQuery]
 
 test_selectQuery :: Test
 test_selectQuery = 
@@ -158,6 +171,18 @@ test_insertQuery =
       parseSQL "INSERT INTO users VALUES" ~?= Left "No parses",
       parseSQL "INSERT INTO users" ~?= Left "No parses",
       parseSQL "INSERT INTO users VALUES 1, \"John Doe\" AND 1" ~?= Left "No parses"
+    ]
+
+test_alterQuery :: Test
+test_alterQuery = 
+    TestList
+    [ 
+      parseSQL "ALTER TABLE users ADD COLUMN id INT" ~?= Right (StatementAlter (TableName "users") (AddColumn (ColumnDefinition (ColumnName "id") CellTypeInt))),
+      parseSQL "ALTER TABLE users DROP COLUMN id" ~?= Right (StatementAlter (TableName "users") (DropColumn (ColumnName "id"))),
+      parseSQL "ALTER TABLE users RENAME COLUMN id TO newid" ~?= Right (StatementAlter (TableName "users") (RenameColumn (ColumnName "id") (ColumnName "newid"))),
+      parseSQL "ALTER TABLE users MODIFY COLUMN id TO (name STRING)" ~?= Right (StatementAlter (TableName "users") (ModifyColumn (ColumnName "id") (ColumnDefinition (ColumnName "name") CellTypeString))),
+      parseSQL "ALTER TABLE users ADD COLUMN id INT AND DROP id" ~?= Left "No parses",
+      parseSQL "ALTER TABLE users" ~?= Left "No parses"
     ]
 
 test_dropQuery :: Test

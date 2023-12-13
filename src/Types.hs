@@ -52,9 +52,17 @@ data ColumnDefinition = ColumnDefinition
   }
   deriving (Eq, Show)
 
+data AlterAction
+  = AddColumn ColumnDefinition
+  | DropColumn ColumnName
+  | RenameColumn ColumnName ColumnName
+  | ModifyColumn ColumnName ColumnDefinition
+  deriving (Eq, Show)
+
 data Statement
   = StatementSelect [ColumnName] TableName [WhereClause]
   | StatementInsert Row TableName
+  | StatementAlter TableName AlterAction
   | StatementCreate TableName [ColumnDefinition]
   | StatementCreateIndex IndexName TableName [ColumnName]
   | StatementDrop TableName
