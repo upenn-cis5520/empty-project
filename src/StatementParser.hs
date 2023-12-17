@@ -8,6 +8,8 @@ import Parser qualified as P
 import Test.HUnit
 import Types
 
+import Data.Map as Map
+
 alphaNum :: Parser Char
 alphaNum = P.satisfy isAlphaNum
 
@@ -98,13 +100,13 @@ selectParser = StatementSelect
     whereClauses = whereClause `P.sepBy` (P.space *> P.string "AND" <* P.space)
 
 
-
-insertParser :: Parser Statement
 insertParser =
-  liftA2
-    (flip StatementInsert)
-    (P.string "INSERT INTO" *> P.space *> parsedTableName <* P.space <* P.string "VALUES" <* P.space)
-    (TVar <$> P.sepBy parsedCell (P.char ',' <* P.space) <* P.eof)
+  liftA3
+    (\tableName columnNames cells -> StatementInsert (Row $ Map.fromList (zip columnNames cells)) tableName)
+    (P.string "INSERT INTO" *> P.space *> parsedTableName <* P.space)
+    (P.char '(' *> P.sepBy1 columnName (P.char ',' *> P.space) <* P.string ")" <* P.space <* P.string "VALUES" <* P.space)
+    (P.sepBy1 parsedCell (P.char ',' *> P.space)  <* P.eof)
+
 
 dropParser :: Parser Statement
 dropParser = StatementDrop <$> (P.string "DROP TABLE" *> P.space *> parsedTableName <* P.eof)
@@ -131,7 +133,6 @@ parsedAlterAction = P.choice [addColumn, dropColumn, renameColumn, modifyColumn]
     addColumn = AddColumn <$> (P.string "ADD COLUMN" *> P.space *> columnDefinition)
     dropColumn = DropColumn <$> (P.string "DROP COLUMN" *> P.space *> columnName)
     renameColumn = RenameColumn <$> (P.string "RENAME COLUMN" *> P.space *> columnName) <*> (P.space *> P.string "TO" *> P.space *> columnName)
-    modifyColumn = ModifyColumn <$> (P.string "MODIFY COLUMN" *> P.space *> columnName) <*> (P.space *> P.string "TO" *> P.space *> P.char '(' *> columnDefinition <* P.char ')')
     columnDefinition = ColumnDefinition <$> columnName <*> (P.space *> cellType)
     cellType = CellTypeInt <$ P.string "INT" <|> CellTypeString <$ P.string "STRING" <|> CellTypeBool <$ P.string "BOOL"
 
@@ -165,12 +166,12 @@ test_insertQuery :: Test
 test_insertQuery = 
     TestList
     [ 
-      parseSQL "INSERT INTO users VALUES 1, \"John Doe\"" ~?= Right (StatementInsert (TVar [CellInt 1, CellString "John Doe"]) (TableName "users")),
-      parseSQL "INSERT INTO users VALUES 1, \"John Doe\", TRUE" ~?= Right (StatementInsert (TVar [CellInt 1, CellString "John Doe", CellBool True]) (TableName "users")),
-      parseSQL "INSERT INTO users VALUES 1" ~?= Right (StatementInsert (TVar [CellInt 1]) (TableName "users")),
+      parseSQL "INSERT INTO users (num, name) VALUES 1, \"John Doe\"" ~?= Right (StatementInsert (Row $ Map.fromList [(ColumnName "num", CellInt 1), (ColumnName "name", CellString "John Doe")]) (TableName "users")),
+      parseSQL "INSERT INTO users (num, name, isEligible) VALUES 1, \"John Doe\", TRUE" ~?= Right (StatementInsert (Row $ Map.fromList [(ColumnName "num", CellInt 1), (ColumnName "name", CellString "John Doe"), (ColumnName "isEligible", CellBool True)]) (TableName "users")),
+      parseSQL "INSERT INTO users (num) VALUES 1" ~?= Right (StatementInsert (Row $ Map.fromList [(ColumnName "num", CellInt 1)]) (TableName "users")),
       parseSQL "INSERT INTO users VALUES" ~?= Left "No parses",
       parseSQL "INSERT INTO users" ~?= Left "No parses",
-      parseSQL "INSERT INTO users VALUES 1, \"John Doe\" AND 1" ~?= Left "No parses"
+      parseSQL "INSERT INTO users (num, name, isEligible) VALUES 1, \"John Doe\" AND 1" ~?= Left "No parses"
     ]
 
 test_alterQuery :: Test
@@ -180,7 +181,6 @@ test_alterQuery =
       parseSQL "ALTER TABLE users ADD COLUMN id INT" ~?= Right (StatementAlter (TableName "users") (AddColumn (ColumnDefinition (ColumnName "id") CellTypeInt))),
       parseSQL "ALTER TABLE users DROP COLUMN id" ~?= Right (StatementAlter (TableName "users") (DropColumn (ColumnName "id"))),
       parseSQL "ALTER TABLE users RENAME COLUMN id TO newid" ~?= Right (StatementAlter (TableName "users") (RenameColumn (ColumnName "id") (ColumnName "newid"))),
-      parseSQL "ALTER TABLE users MODIFY COLUMN id TO (name STRING)" ~?= Right (StatementAlter (TableName "users") (ModifyColumn (ColumnName "id") (ColumnDefinition (ColumnName "name") CellTypeString))),
       parseSQL "ALTER TABLE users ADD COLUMN id INT AND DROP id" ~?= Left "No parses",
       parseSQL "ALTER TABLE users" ~?= Left "No parses"
     ]

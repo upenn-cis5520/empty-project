@@ -19,45 +19,58 @@ module Types where
 
 import Control.Concurrent.STM
 import Control.Monad (fail)
+import Control.Monad.IO.Class
 import Control.Monad.State
 import Data.Map (Map)
 
 -- import Data.Aeson
 
-newtype TableName = TableName {unTableName :: String} deriving (Eq, Show)
+newtype TableName = TableName {unTableName :: String} deriving (Eq, Show, Ord)
 
-data CellType = CellTypeInt | CellTypeString | CellTypeBool deriving (Eq, Show)
+data CellType = CellTypeInt | CellTypeString | CellTypeBool deriving (Eq, Show, Ord)
 
 data Cell where
   CellInt :: Int -> Cell
   CellString :: String -> Cell
   CellBool :: Bool -> Cell
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
-newtype Row = TVar [Cell] deriving (Eq, Show)
+-- newtype Row = TVar [Cell] deriving (Eq, Show, Ord)
 
-newtype ColumnName = ColumnName String deriving (Eq, Show)
+newtype Row = Row (Map ColumnName Cell) deriving (Eq, Show, Ord)
 
-newtype IndexName = IndexName String deriving (Eq, Show)
+newtype ColumnName = ColumnName String deriving (Eq, Show, Ord)
+
+newtype IndexName = IndexName String deriving (Eq, Show, Ord)
 
 data WhereClause = WhereClause
   { whereClauseColumn :: ColumnName,
     whereClauseValue :: Cell
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 data ColumnDefinition = ColumnDefinition
   { columnDefinitionName :: ColumnName,
     columnDefinitionType :: CellType
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
+
+data StatementFailureType
+  = TableDoesNotExist
+  | ColumnDoesNotExist
+  | IndexDoesNotExist
+  | RowDoesNotExist
+  | ColumnTypeMismatch
+  | ColumnAlreadyExists
+  | IndexAlreadyExists
+  | TableAlreadyExists
+  deriving (Eq, Show, Ord)
 
 data AlterAction
   = AddColumn ColumnDefinition
   | DropColumn ColumnName
   | RenameColumn ColumnName ColumnName
-  | ModifyColumn ColumnName ColumnDefinition
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 data Statement
   = StatementSelect [ColumnName] TableName [WhereClause]
@@ -67,11 +80,11 @@ data Statement
   | StatementCreateIndex IndexName TableName [ColumnName]
   | StatementDrop TableName
   | StatementDropIndex IndexName
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
-newtype Transaction = Atomic [Statement] deriving (Eq, Show)
+newtype Transaction = Atomic [Statement] deriving (Eq, Show, Ord)
 
-newtype PrimaryKey = PrimaryKey {unPrimaryKey :: Int} deriving (Eq, Show)
+newtype PrimaryKey = PrimaryKey {unPrimaryKey :: Int} deriving (Eq, Show, Ord)
 
 data Table = Table
   { tableName :: TableName,
@@ -80,7 +93,7 @@ data Table = Table
     tableNextPrimaryKey :: PrimaryKey,
     tableIndices :: [IndexName]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 data Index = Index
   { indexName :: IndexName,
@@ -88,7 +101,7 @@ data Index = Index
     indexColumns :: [ColumnName],
     indexData :: Map [Cell] [Row]
   }
-  deriving (Eq, Show)
+  deriving (Eq, Show, Ord)
 
 data Database = Database
   { databaseTables :: Map TableName (TVar Table),
@@ -96,6 +109,10 @@ data Database = Database
   }
   deriving (Eq)
 
-newtype Response = Response {res :: String} deriving (Eq, Show)
+-- type MonadDatabase m = (MonadState Database m)
+
+class (MonadState Database m, MonadIO m) => MonadDatabase m
+
+newtype Response = Response {res :: String} deriving (Eq, Show, Ord)
 
 type DBRef = TVar Database

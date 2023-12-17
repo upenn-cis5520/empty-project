@@ -5,41 +5,12 @@ fulltitle: Red Black Trees (with GADTs 3)
 date:
 ---
 
-This version of RedBlack trees demonstrates the use of GADTs to
-statically verify all four RedBlack tree invariants.
-
-\* In this version, the type system enforces that the root is black
-  by using a "singleton" type.
-
-\* In this version, the type system enforces that red nodes have
-  black children
-
-\* In this version, the type system enforces the black height
-  is maintained
-
-The definitions below are the same as the RedBlack module from last week, except that
-
-(a) we use standalone deriving for Show & Foldable, and give an explicit instance of Eq
-(b) we use the alternative GADT syntax to define the Color & RBT datatypes
-(c) we only do the insert function (we won't have time to demonstrate deletion)
-(d) we've slightly refactored balance
-
-Below, most of the code should be familiar.
-
-In preparation for the demo, we'll include a few additional language features, for GADTs,
-using datatypes in kinds, for type-level functions (new) and to easily run all of the
-QuickCheck properties in the file.
 -}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module RedBlackGADT3 where
-
-{-
-We'll make the following standard library functions available for this
-implementation.
--}
 
 import Data.Foldable qualified as Foldable
 import Data.Kind (Type)
@@ -49,79 +20,15 @@ And we'll use QuickCheck for testing.
 
 import Test.QuickCheck hiding (elements)
 
-{-
-API preview
------------
-
-Our goal is to use red-black trees to implement a finite set data structure, with a similar interface to Java's [SortedSet](https://docs.oracle.com/javase/8/docs/api/java/util/SortedSet.html)
-or Haskell's [Data.Set](http://hackage.haskell.org/package/containers-0.6.4.1/docs/Data-Set.html).
-
-This module defines the following API for finite sets:
-
-<    type RBT a  -- a red-black tree containing elements of type a
-
-<    empty         :: RBT a
-<    insert        :: Ord a => a -> RBT a -> RBT a
-<    member        :: Ord a => a -> RBT a -> Bool
-<    elements      :: RBT a -> [a]
-
-This interface specifies a *persistent* set of ordered elements. We can tell
-that the implementation is persistent just by looking at the types of the
-operations. In particular, the empty operation is not a function, it is just
-a set --- there is only one empty set. If we were allowed to mutate it, it
-wouldn't be empty any more. Furthermore, the `insert` and `delete` operations
-return a new set instead of modifying their argument.
-
-Red-black trees
----------------
-
-Here, again, are the invariants for red-black trees:
-
-  1. The empty nodes at the leaves are black.
-
-  2. The root is black.
-
-  3. From each node, every path to a leaf has the same number of black nodes.
-
-  4. Red nodes have black children.
-
-Numbers
-------
-
-The new component, a number tracking the black height
-
--}
-
 data Nat = O | S Nat
-
-{-
-and a type-level function that (conditionally) increments it
-
--}
 
 type family Incr (c :: Color) (n :: Nat) :: Nat where
   Incr Black n = S n
   Incr Red n = n
 
-{-
-Tree Structure
---------------
-
-If it has been a while since you have seen red-black trees, [refresh your
-memory](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree).
-
-A red-black tree is a binary search tree where every node is marked with a
-color (red `R` or black `B`).  For brevity, we will abbreviate the standard
-tree constructors `Empty` and `Branch` as `E` and `N`.
--}
-
 data Color where
   Red :: Color
   Black :: Color
-
-{-
-A "singleton type" for colors
--}
 
 data SColor c where
   R :: SColor Red
@@ -137,10 +44,7 @@ R %== R = True
 B %== B = True
 _ %== _ = False
 
-{-
-A "colored" tree
-
--}
+{- A "colored" tree -}
 
 data CT n c a where
   E :: CT O Black a
