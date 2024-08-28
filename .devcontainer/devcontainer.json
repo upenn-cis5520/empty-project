@@ -1,0 +1,51 @@
+{
+  "name": "DevContainer for Haskell (GHC, Stack, Cabal, HIE, LSP, DAP, etc.)",
+//  "remoteUser": "vscode",
+  "runArgs": [],
+  "build": {
+    "args": {
+ //     "USERNAME": "vscode",
+      "GHC_VERSION": "9.6.3",
+      "STACK_VERSION": "recommended",
+      "STACK_RESOLVER": "nightly",
+      "CABAL_VERSION": "recommended",
+      "HLS_VERSION": "recommended",
+      "LLVM_VERSION": "17"
+    },
+    "context": "..",
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "haskell.haskell",
+        "phoityne.phoityne-vscode",
+        "eriksik2.vscode-ghci",
+        "jcanero.hoogle-vscode"
+      ],
+      "settings": {
+        "files.exclude": {
+          "**/*.olean": true,
+          "**/.DS_Store": true,
+          "**/.git": true,
+          "**/.hg": true,
+          "**/.svn": true,
+          "**/CVS": true
+        },
+        "haskell.checkProject": true,
+        "haskell.formattingProvider": "ormolu",
+        "haskell.indentationRules.enabled": true,
+        "haskell.liquidOn": false,
+        "haskell.checkParents": "CheckOnSave",
+        "haskell.manageHLS": "GHCup",
+        "haskell.maxCompletions": 40,
+        "haskell.openDocumentationInHackage": false,
+        "haskell.openSourceInHackage": false,
+        "haskell.trace.client": "error",
+        "haskell.trace.server": "off",
+        "haskell.upgradeGHCup": true,
+        "hoogle-vscode.useCabalDependencies": true
+      }
+    }
+  }
+}
