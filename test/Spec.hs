@@ -3,6 +3,8 @@ import Test.QuickCheck
 
 import Lib
 
+-- >>> someDecl
+
 main :: IO ()
 main = do 
     putStrLn someDecl

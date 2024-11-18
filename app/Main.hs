@@ -4,7 +4,7 @@ module Main where
 
 import Lib
 
-
+-- >>> someDecl
 
 main :: IO ()
 main = putStrLn someDecl

@@ -1,2 +1,3 @@
 cradle:
-  cabal:
+  stack:
+    component: "project-cis5520:lib"
