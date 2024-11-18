@@ -5,5 +5,5 @@ import Lib
 
 main :: IO ()
 main = do 
-    putStrLn someFunc
+    putStrLn someDecl
     putStrLn "Test suite not yet implemented"
